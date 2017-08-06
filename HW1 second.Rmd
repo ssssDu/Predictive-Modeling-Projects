@@ -1,0 +1,86 @@
+---
+title: "Homework1"
+author: "Jack Cheng"
+date: "8/6/2017"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is the homework 1 for the second part of STA380 in Red McCombs business school.
+
+
+
+# Statistics Questions:
+
+## Question 1 
+
+
+From the question we know that:
+
+P(RC)=0.3
+
+P(TC)=1-P(RC)=0.7 since TC is the complement of RC
+
+P(Y)=0.65
+
+P(Y|RC)=0.5
+
+Where RC denotes that the clicker is a random clicker, TC denotes the clicker is a truthful clicker and Y denotes the result is yes.
+
+And we want to know P(Y|TC).
+
+Solution:
+
+P(Y,RC)=P(Y|RC)\*P(RC)=0.5\*0.3=0.15
+
+P(Y,TC)=P(Y)-P(Y,RC)=0.65-0.15=0.5 since TC is the complement of RC
+
+so P(Y|TC)=P(Y,TC)/P(TC)=0.5/0.7=0.7142857
+
+
+
+## Question 2
+
+From the question we know that:
+
+P(P|D)=0.993
+
+P(N|Dc)=0.9999
+
+P(D)=0.000025
+
+Where D denotes with desease, Dc denotes no desease, P denotes positive and N denotes negative.
+
+We want to know: P(D|P)
+
+Solution:
+
+since we know Dc is the complement of D 
+
+so P(Dc)=1-P(D)=0.999975 and P(P)=P(Dc,P)+P(D,P)
+
+and N is the complement of P 
+
+so P(P|Dc)=1-P(N|Dc)=0.0001
+
+
+P(D|P)=P(D,P)/P(P)
+
+=(P(P|D)\*P(D))/(P(D,P)+P(Dc,P))
+
+=(P(P|D)\*P(D))/(P(P|D)\*P(D)+P(Dc,P)\*P(Dc))
+
+=0.993\*0.000025/(0.993\*0.000025+0.0001\*0.999975)=0.1988824
+
+Which is really high! 
+
+That is to say though the sensitivity and specificity of the test is really good, due to the fact that the prior probability of desease is so low as 0.000025, the false positive rate is still really high. This kind of implementing a universal testing policy for the disease will lead to panic and chaos.
+
+
