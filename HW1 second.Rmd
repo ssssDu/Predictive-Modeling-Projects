@@ -84,3 +84,126 @@ Which is really high!
 That is to say though the sensitivity and specificity of the test is really good, due to the fact that the prior probability of desease is so low as 0.000025, the false positive rate is still really high. This kind of implementing a universal testing policy for the disease will lead to panic and chaos.
 
 
+
+# Exploratory analysis: green buildings
+
+
+# Bootstrapping
+
+```{R}
+library(mosaic)
+library(quantmod)
+library(foreach)
+mystocks = c("SPY", "TLT", "LQD","EEM","VNQ")
+getSymbols(mystocks)
+
+```
+
+```{R}
+
+EEMa = adjustOHLC(EEM)
+LQDa = adjustOHLC(LQD)
+SPYa = adjustOHLC(SPY)
+TLTa = adjustOHLC(TLT)
+VNQa = adjustOHLC(VNQ)
+
+all_returns = cbind(ClCl(EEMa),ClCl(LQDa),ClCl(SPYa),ClCl(TLTa),ClCl(VNQa))
+all_returns = as.matrix(na.omit(all_returns))
+par(mfrow=c(2,3))
+plot(all_returns[,1], type='l', xlab="2007-2017",ylab="Daily Return_EEM")
+plot(all_returns[,2], type='l', xlab="2007-2017",ylab="Daily Return_LQD")
+plot(all_returns[,3], type='l',xlab="2007-2017",ylab="Market return(S&P)")
+plot(all_returns[,4], type='l',xlab="2007-2017",ylab="Risk free return（TLT）")
+plot(all_returns[,5], type='l',xlab="2007-2017",ylab="Daily Return_VNQ")
+
+```
+* There are many ways to measure the performance of a certain asset. Here we choose the sharp ratio, Jensen's alpha and treynor ratio as examples.
+
+Note that sharp ratio is the ratio between extra mean return exceed risk free asset and the volitility of asset. 
+
+Let us see the sharp ratio for those assets first:
+
+```{R}
+
+# First use TLT as an approximation to the risk free asset. Calculate the extra return of each asset:
+EEMa = adjustOHLC(EEM)
+LQDa = adjustOHLC(LQD)
+SPYa = adjustOHLC(SPY)
+TLTa = adjustOHLC(TLT)
+VNQa = adjustOHLC(VNQ)
+EEM_extra_return=all_returns[,1]-all_returns[,4]
+LQD_extra_return=all_returns[,2]-all_returns[,4]
+Market_extra_return=all_returns[,3]-all_returns[,4]
+VNQ_extra_return=all_returns[,5]-all_returns[,4]
+
+EEM_SD=sd(EEM_extra_return)
+LQD_SD=sd(LQD_extra_return)
+Market_SD=sd(Market_extra_return)
+VNQ_SD=sd(VNQ_extra_return)
+
+SR_EEM=mean(EEM_extra_return)/EEM_SD
+SR_LQD=mean(LQD_extra_return)/LQD_SD
+SR_Market=mean(Market_extra_return)/Market_SD
+SR_VNQ=mean(VNQ_extra_return)/VNQ_SD
+
+```
+
+
+
+
+
+
+```{R}
+# now see the sharp ratio for these assets
+SR_EEM
+SR_LQD
+SR_Market
+SR_VNQ
+```
+Actually here we see that LQD have a lower mean return than risk free asset, that probably suggest us not to invest in this asset since this performance is really terrible. EEM got the highest sharp ratio.
+
+
+Then we look at Jensen's alpha:
+
+Jensen's alpha is a measurement of the return after adjusting by taking risk into account.
+
+Fit the data with a CAPM model first:
+
+```{R}
+lmEEM=lm(EEM_extra_return~Market_extra_return)
+lmLQD=lm(LQD_extra_return~Market_extra_return)
+lmVNQ=lm(VNQ_extra_return~Market_extra_return)
+coef(lmEEM)
+coef(lmLQD)
+coef(lmVNQ)
+```
+The alpha and beta are intercept and beta in this particular case.
+
+We can see that EEM get the highest alpha while VNQ get the lowest.
+
+
+```{R}
+initial_wealth = 10000
+sim1 = foreach(i=1:5000, .combine='rbind') %do% {
+	total_wealth = initial_wealth
+	weights = c(0.2, 0.2, 0.2, 0.2, 0.2)
+	holdings = weights * total_wealth
+	n_days = 20
+	wealthtracker = rep(0, n_days)
+	for(today in 1:n_days) {
+		return.today = resample(all_returns, 1, orig.ids=FALSE)
+		holdings = holdings + holdings*return.today
+		total_wealth = sum(holdings)
+		wealthtracker[today] = total_wealth
+	}
+	wealthtracker
+}
+
+```
+
+```{R}
+hist(sim1[,n_days]- initial_wealth, breaks=30)
+```
+
+
+
