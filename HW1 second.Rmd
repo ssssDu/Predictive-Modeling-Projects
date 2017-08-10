@@ -181,8 +181,24 @@ The alpha and beta are intercept and beta in this particular case.
 
 We can see that EEM get the highest alpha while VNQ get the lowest.
 
-
+Then let us look at the treynor ratio:
 ```{R}
+TR_EEM=mean(EEM_extra_return)/coef(lmEEM)[2]
+TR_LQD=mean(LQD_extra_return)/coef(lmLQD)[2]
+TR_VNQ=mean(VNQ_extra_return)/coef(lmVNQ)[2]
+
+TR_EEM
+TR_LQD
+TR_VNQ
+```
+We can see here that EEM is with the highest treynor ratio.
+
+
+Now we begin the boostrapping simulation.
+
+## The even split one
+```{R}
+set.seed(888)
 initial_wealth = 10000
 sim1 = foreach(i=1:5000, .combine='rbind') %do% {
 	total_wealth = initial_wealth
@@ -198,12 +214,61 @@ sim1 = foreach(i=1:5000, .combine='rbind') %do% {
 	}
 	wealthtracker
 }
+mean(sim1[,n_days]- initial_wealth)
 
-```
-
-```{R}
 hist(sim1[,n_days]- initial_wealth, breaks=30)
 ```
 
+Next we have our safe portfolio as we invest more on the TLT and since we analysis that LQD is inefficient so we do not invest in it.
 
 
+```{R}
+set.seed(888)
+initial_wealth = 10000
+sim2 = foreach(i=1:5000, .combine='rbind') %do% {
+	total_wealth = initial_wealth
+	weights = c(0.1, 0, 0.1, 0.7, 0.1)
+	holdings = weights * total_wealth
+	n_days = 20
+	wealthtracker = rep(0, n_days)
+	for(today in 1:n_days) {
+		return.today = resample(all_returns, 1, orig.ids=FALSE)
+		holdings = holdings + holdings*return.today
+		total_wealth = sum(holdings)
+		wealthtracker[today] = total_wealth
+	}
+	wealthtracker
+}
+mean(sim2[,n_days]- initial_wealth)
+hist(sim2[,n_days]- initial_wealth, breaks=30)
+```
+
+
+Then 
+
+```{R}
+set.seed(888)
+initial_wealth = 10000
+sim3 = foreach(i=1:5000, .combine='rbind') %do% {
+	total_wealth = initial_wealth
+	weights = c(0.6, 0, 0.1, 0.1, 0.1)
+	holdings = weights * total_wealth
+	n_days = 20
+	wealthtracker = rep(0, n_days)
+	for(today in 1:n_days) {
+		return.today = resample(all_returns, 1, orig.ids=FALSE)
+		holdings = holdings + holdings*return.today
+		total_wealth = sum(holdings)
+		wealthtracker[today] = total_wealth
+	}
+	wealthtracker
+}
+mean(sim3[,n_days]- initial_wealth)
+hist(sim3[,n_days]- initial_wealth, breaks=30)
+```
+```{R}
+quantile(sim1[,n_days], 0.05) - initial_wealth
+quantile(sim2[,n_days], 0.05) - initial_wealth
+quantile(sim3[,n_days], 0.05) - initial_wealth
+```
+As we can see, here we have the value at risk of 5% for these three different portfolio with different style, and these numbers make sence as the aggressive one have the highest risk and the safe one is with the lowest risk.
