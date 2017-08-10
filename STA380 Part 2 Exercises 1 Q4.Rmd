@@ -1,0 +1,139 @@
+---
+title: "STA380 Part 2  Exercises 1"
+author: "Lufang Liu"
+date: "8/9/2017"
+output: html_document
+---
+
+#Market segmentation
+
+```{r message=FALSE}
+library(pander)
+library(ggplot2)
+library(LICORS)
+library(foreach)
+library(mosaic)
+library(gridExtra)
+library(wordcloud)
+```
+
+##Data Cleaning
+
+```{r}
+sm = read.csv('~/GitHub_Desktop/STA380/data/social_marketing.csv')
+rownames(sm) = social_raw$X
+sm_sub = subset(sm, select = -c(X,uncategorized, spam, adult, chatter))
+sm_new = scale(sm_2, center=TRUE, scale=TRUE)
+```
+
+##K-means Clustering
+
+```{r}
+kmeans_sm2 = kmeans(sm_new, 2, nstart = 25)
+kmeans_sm3 = kmeans(sm_new, 3, nstart = 25)
+kmeans_sm4 = kmeans(sm_new, 4, nstart = 25)
+kmeans_sm5 = kmeans(sm_new, 5, nstart = 25)
+kmeans_sm6 = kmeans(sm_new, 6, nstart = 25)
+kmeans_sm7 = kmeans(sm_new, 7, nstart = 25)
+kmeans_sm8 = kmeans(sm_new, 8, nstart = 25)
+
+CHK2 = kmeans_sm2$betweenss/kmeans_sm2$tot.withinss * (7882 - 2)/(2-1)
+CHK3 = kmeans_sm3$betweenss/kmeans_sm3$tot.withinss * (7882 - 3)/(3-1)
+CHK4 = kmeans_sm4$betweenss/kmeans_sm4$tot.withinss * (7882 - 4)/(4-1)
+CHK5 = kmeans_sm5$betweenss/kmeans_sm5$tot.withinss * (7882 - 5)/(5-1)
+CHK6 = kmeans_sm6$betweenss/kmeans_sm6$tot.withinss * (7882 - 6)/(6-1)
+CHK7 = kmeans_sm7$betweenss/kmeans_sm7$tot.withinss * (7882 - 7)/(7-1)
+CHK8 = kmeans_sm8$betweenss/kmeans_sm8$tot.withinss * (7882 - 8)/(8-1)
+
+k = c(2,3,4,5,6,7,8)
+CHK = c(CHK2,CHK3,CHK4,CHK5,CHK6,CHK7,CHK8)
+WK = c(kmeans_sm2$tot.withinss,kmeans_sm3$tot.withinss,kmeans_sm4$tot.withinss,kmeans_sm5$tot.withinss,kmeans_sm6$tot.withinss,kmeans_sm7$tot.withinss,kmeans_sm8$tot.withinss)
+plot(CHK ~ k, type = 'b')
+plot(WK ~ k, type='b')
+```
+
+```{r}
+print(apply(kmeans_sm2$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm2$size
+```
+
+
+```{r}
+print(apply(kmeans_sm3$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm3$size
+```
+
+```{r}
+print(apply(kmeans_sm4$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm4$size
+```
+
+```{r}
+print(apply(kmeans_sm5$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm5$size
+```
+
+```{r}
+print(apply(kmeans_sm6$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm6$size
+```
+
+```{r}
+print(apply(kmeans_sm7$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm7$size
+```
+
+```{r}
+print(apply(kmeans_sm8$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm8$size
+
+```
+
+##K-mean++
+
+```{r}
+kmeanspp_sm = kmeanspp(sm_new, 5)
+print(apply(kmeanspp_sm$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeanspp_sm$size
+```
+
+```{r}
+
+kmeans_sm6$withinss
+kmeanspp_sm$withinss
+sum(kmeans_sm6$withinss)
+sum(kmeanspp_sm$withinss)
+kmeans_sm6$tot.withinss
+kmeanspp_sm$tot.withinss
+kmeans_sm6$betweenss
+kmeanspp_sm$betweenss
+```
+
+```{r}
+sm_distance_matrix = dist(sm_new, method='euclidean')
+
+hier_sm = hclust(sm_distance_matrix, method='average')
+cluster1 = cutree(hier_sm, k=6)
+
+hier_sm2 = hclust(sm_distance_matrix, method='complete')
+cluster2 = cutree(hier_sm2, k=6)
+
+hier_sm3 = hclust(sm_distance_matrix, method='single')
+cluster3 = cutree(hier_sm3, k=5)
+
+summary(factor(cluster1))
+
+summary(factor(cluster2))
+
+summary(factor(cluster3))
+```
+
+```{r}
+plot(hier_social, cex=0.3)
+
+plot(hier_social2, cex=0.3)
+
+plot(hier_social3, cex=0.3)
+
+```
+
