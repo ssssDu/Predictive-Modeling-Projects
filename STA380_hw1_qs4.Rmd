@@ -1,0 +1,190 @@
+---
+title: "STA380_part2_exe1_qs4"
+author: "tester"
+date: "August 10, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+#Market segmentation
+
+```{r message=FALSE}
+library(pander)
+library(ggplot2)
+library(LICORS)
+library(foreach)
+library(mosaic)
+library(gridExtra)
+library(wordcloud)
+```
+
+##Data Cleaning
+
+```{r}
+sm = read.csv(choose.files())
+sm_1 = subset(sm, select = -c(X,uncategorized, spam, adult, chatter))
+sm_sub=sm_1/rowSums(sm_1)
+sm_new = scale(sm_sub, center=TRUE, scale=TRUE)
+```
+
+##K-means Clustering
+
+```{r}
+
+list= rep(NA, dim(sm_new)[2]-1)
+list2= rep(NA, dim(sm_new)[2]-1)
+
+set.seed(1)
+for ( i in 2:dim(sm_new)[2]){
+  list[i-1]=kmeans(sm_new, i , nstart = 50)$betweenss/ kmeans(sm_new, i , nstart = 50)$tot.withinss *(dim(sm_new)[1]-i)/(i-1)
+  list2[i-1]=kmeans(sm_new, i , nstart = 50)$tot.withinss
+}
+
+par(mfrow=c(1,2))
+plot(list ~ c(2:32), type='b', xlab = 'number of K', ylab = 'CH(K)')
+plot(list2 ~ c(2:32), type='b',xlab='number of k',ylab='W(k)')
+
+```
+So based on the graphs above, we are able to see the relationship between number of K and CH(K) and W(K) respectively. As the number of K increases, both values of CH(K) and W(K) decrease. Since we could only have 32 clusters for 32 variables, we tried different K from k=2 to k=32 and find out that CH(K) and W(K) are at minimum when K=32. However, this does not make sense to us since K=32 is too large and we would have same variables in different clusters.
+
+```
+## K means for k=2 to k=8
+```{r}
+set.seed(1)
+kmeans_sm2<- kmeans(sm_new, 2, nstart = 50)
+print(apply(kmeans_sm2$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm3$size
+```
+```{r}
+set.seed(1)
+kmeans_sm3<- kmeans(sm_new, 3, nstart = 50)
+print(apply(kmeans_sm3$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm3$size
+```
+```{r}
+set.seed(1)
+kmeans_sm4<- kmeans(sm_new, 4, nstart = 50)
+print(apply(kmeans_sm4$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm3$size
+```
+```{r}
+set.seed(1)
+kmeans_sm5<- kmeans(sm_new, 5, nstart = 50)
+print(apply(kmeans_sm5$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm3$size
+```
+```{r}
+set.seed(1)
+kmeans_sm6<- kmeans(sm_new, 6, nstart = 50)
+print(apply(kmeans_sm6$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm3$size
+```
+```{r}
+set.seed(1)
+kmeans_sm7<- kmeans(sm_new, 7, nstart = 50)
+print(apply(kmeans_sm7$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm3$size
+```
+```{r}
+set.seed(1)
+kmeans_sm8<- kmeans(sm_new, 8, nstart = 50)
+print(apply(kmeans_sm8$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm3$size
+```
+## K means ++ for k=2 to k=8
+```{r}
+set.seed(1)
+kmeanspp_sm2<- kmeanspp(sm_new, 2)
+print(apply(kmeanspp_sm2$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm2$size
+```
+
+```{r}
+set.seed(1)
+kmeanspp_sm3<- kmeanspp(sm_new, 3)
+print(apply(kmeanspp_sm3$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm3$size
+```
+
+```{r}
+set.seed(1)
+kmeanspp_sm4<- kmeanspp(sm_new, 4)
+print(apply(kmeanspp_sm4$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm4$size
+```
+
+```{r}
+set.seed(1)
+kmeanspp_sm5<- kmeanspp(sm_new, 5)
+print(apply(kmeanspp_sm5$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm5$size
+```
+
+```{r}
+set.seed(1)
+kmeanspp_sm6<- kmeanspp(sm_new, 6)
+print(apply(kmeanspp_sm6$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm6$size
+```
+
+```{r}
+set.seed(1)
+kmeanspp_sm7<- kmeanspp(sm_new, 7)
+print(apply(kmeanspp_sm7$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm7$size
+```
+
+```{r}
+set.seed(1)
+kmeanspp_sm8<- kmeanspp(sm_new, 8)
+print(apply(kmeanspp_sm8$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm8$size
+
+```
+After we look at the k mean ++ method, we concluded that when k = 5 or 6, the clustering result makes more sense to us. So we decided to go with this result.
+```{r}
+
+kmeanspp_sm2$withinss
+kmeanspp_sm3$withinss
+kmeanspp_sm4$withinss
+kmeanspp_sm5$withinss
+kmeanspp_sm6$withinss
+kmeanspp_sm7$withinss
+kmeanspp_sm8$withinss
+
+```
+
+```{r}
+sm_distance_matrix = dist(sm_new, method='euclidean')
+
+hier_sm = hclust(sm_distance_matrix, method='average')
+cluster1 = cutree(hier_sm, k=6)
+
+hier_sm2 = hclust(sm_distance_matrix, method='complete')
+cluster2 = cutree(hier_sm2, k=6)
+
+hier_sm3 = hclust(sm_distance_matrix, method='single')
+cluster3 = cutree(hier_sm3, k=6)
+
+summary(factor(cluster1))
+
+summary(factor(cluster2))
+
+summary(factor(cluster3))
+```
+We tried hcluster for k=6 for min, max and average methods and find out that hcluster does not work very well in this case because most of the data points lie on cluster 1.
+
+
+```{r}
+plot(hier_sm, cex=0.3)
+
+plot(hier_social2, cex=0.3)
+
+plot(hier_social3, cex=0.3)
+
+```
+
