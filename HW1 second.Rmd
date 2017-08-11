@@ -120,6 +120,9 @@ plot(all_returns[,5], type='l',xlab="2007-2017",ylab="Daily Return_VNQ")
 ```
 First let us just to explore the data by looking at the mean and variance of each asset to get a roughly idea about their risk return properties:
 ```{R}
+boxplot(all_returns,outline=FALSE,col=rainbow(5),ylab='Return')
+
+
 library(plotly)
 plot_ly(type='box', yaxis= list(range = c(-0.5, 0.5))) %>%
   add_boxplot(y = all_returns[,3], name = 'SPY') %>%
