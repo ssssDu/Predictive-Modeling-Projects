@@ -456,8 +456,9 @@ summary(factor(cluster2))
 
 summary(factor(cluster3))
 ```
-We tried hcluster for k=6 for min, max and average methods and find out that hcluster does not work very well in this case because most of the data points lie on cluster 1.
+We tried hcluster for k=5 for min, max and average methods and find out that hcluster does not work very well in this case because most of the data points lie on cluster 1.
 
+So we just give up using this hcluster model due to its significantly inbalance cluster result that obviously will not work for the user segmentation task.
 
 ```{r}
 plot(hier_sm, cex=0.3)
@@ -467,3 +468,14 @@ plot(hier_sm2, cex=0.3)
 plot(hier_sm3, cex=0.3)
 
 ```
+
+```{R}
+set.seed(1)
+require("RColorBrewer")
+wordcloud(colnames(sm_sub),kmeanspp_sm5$centers[1,],min.freq=0,max.words=1000, colors = rainbow(32),ordered.colors = TRUE) 
+wordcloud(colnames(sm_sub),kmeanspp_sm5$centers[2,],min.freq=0,max.words=1000, colors = rainbow(32),ordered.colors = TRUE) 
+wordcloud(colnames(sm_sub),kmeanspp_sm5$centers[3,],min.freq=0,max.words=1000, colors = rainbow(32),ordered.colors = TRUE) 
+wordcloud(colnames(sm_sub),kmeanspp_sm5$centers[4,],min.freq=0,max.words=1000, colors = rainbow(32),ordered.colors = TRUE) 
+wordcloud(colnames(sm_sub),kmeanspp_sm5$centers[5,],min.freq=0,max.words=1000, colors = rainbow(32),ordered.colors = TRUE) 
+```
+
