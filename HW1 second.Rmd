@@ -5,6 +5,7 @@ date: "8/6/2017"
 output:
   pdf_document: default
   html_document: default
+always_allow_html: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -110,10 +111,10 @@ VNQa = adjustOHLC(VNQ)
 all_returns = cbind(ClCl(EEMa),ClCl(LQDa),ClCl(SPYa),ClCl(TLTa),ClCl(VNQa))
 all_returns = as.matrix(na.omit(all_returns))
 par(mfrow=c(2,3))
-plot(all_returns[,1], type='l', xlab="2007-2017",ylab="Daily Return_EEM")
-plot(all_returns[,2], type='l', xlab="2007-2017",ylab="Daily Return_LQD")
+plot(all_returns[,1], type='l',xlab="2007-2017",ylab="Daily Return_EEM")
+plot(all_returns[,2], type='l',xlab="2007-2017",ylab="Daily Return_LQD")
 plot(all_returns[,3], type='l',xlab="2007-2017",ylab="Market return(S&P)")
-plot(all_returns[,4], type='l',xlab="2007-2017",ylab="Risk free return（TLT）")
+plot(all_returns[,4], type='l',xlab="2007-2017",ylab="risk free return")
 plot(all_returns[,5], type='l',xlab="2007-2017",ylab="Daily Return_VNQ")
 
 ```
@@ -136,9 +137,10 @@ Then let us see the sharp ratio for those assets first to get a more through mea
 * There are many ways to measure the performance of a certain asset. Here we choose the sharp ratio, Jensen's alpha and treynor ratio as examples.
 
 Note that sharp ratio is the ratio between extra mean return exceed risk free asset and the volitility of asset. 
+
+First use TLT as an approximation to the risk free asset. Calculate the extra return of each asset:
 ```{R}
 
-# First use TLT as an approximation to the risk free asset. Calculate the extra return of each asset:
 EEMa = adjustOHLC(EEM)
 LQDa = adjustOHLC(LQD)
 SPYa = adjustOHLC(SPY)
@@ -158,7 +160,7 @@ SR_EEM=mean(EEM_extra_return)/EEM_SD
 SR_LQD=mean(LQD_extra_return)/LQD_SD
 SR_Market=mean(Market_extra_return)/Market_SD
 SR_VNQ=mean(VNQ_extra_return)/VNQ_SD
-# now see the sharp ratio for these assets
+
 SR_EEM
 SR_LQD
 SR_Market
@@ -205,7 +207,7 @@ Now we begin the boostrapping simulation.
 ```{R}
 set.seed(888)
 initial_wealth = 10000
-sim1 = foreach(i=1:5000, .combine='rbind') %do% {
+sim1 = foreach(i=1:500, .combine='rbind') %do% {
 	total_wealth = initial_wealth
 	weights = c(0.2, 0.2, 0.2, 0.2, 0.2)
 	holdings = weights * total_wealth
@@ -220,8 +222,9 @@ sim1 = foreach(i=1:5000, .combine='rbind') %do% {
 	wealthtracker
 }
 mean(sim1[,n_days]- initial_wealth)
+hist(main = 'The even split portfolio return',sim1[,n_days]- initial_wealth, breaks=30)
 
-hist(sim1[,n_days]- initial_wealth, breaks=30)
+
 ```
 ## The safer portfolio
 Next we have our safe portfolio as we invest more on the TLT and since we analysis that LQD is inefficient so we do not invest in it.
@@ -230,7 +233,7 @@ Next we have our safe portfolio as we invest more on the TLT and since we analys
 ```{R}
 set.seed(888)
 initial_wealth = 10000
-sim2 = foreach(i=1:5000, .combine='rbind') %do% {
+sim2 = foreach(i=1:500, .combine='rbind') %do% {
 	total_wealth = initial_wealth
 	weights = c(0.1, 0, 0.1, 0.7, 0.1)
 	holdings = weights * total_wealth
@@ -245,16 +248,19 @@ sim2 = foreach(i=1:5000, .combine='rbind') %do% {
 	wealthtracker
 }
 mean(sim2[,n_days]- initial_wealth)
-hist(sim2[,n_days]- initial_wealth, breaks=30)
+hist(main = 'The safer portfolio return',sim2[,n_days]- initial_wealth, breaks=30)
+
 ```
 
 
-Then the more aggressive one. In this one we choose to invest in more EEM which is a more risky asset.
+## The more aggressive one. 
+
+In this one we choose to invest in more EEM which is a more risky asset.
 
 ```{R}
 set.seed(888)
 initial_wealth = 10000
-sim3 = foreach(i=1:5000, .combine='rbind') %do% {
+sim3 = foreach(i=1:500, .combine='rbind') %do% {
 	total_wealth = initial_wealth
 	weights = c(0.6, 0, 0.1, 0.1, 0.1)
 	holdings = weights * total_wealth
@@ -269,7 +275,7 @@ sim3 = foreach(i=1:5000, .combine='rbind') %do% {
 	wealthtracker
 }
 mean(sim3[,n_days]- initial_wealth)
-hist(sim3[,n_days]- initial_wealth, breaks=30)
+hist(main = 'The more aggressive portfolio return',sim3[,n_days]- initial_wealth, breaks=30)
 ```
 Now let us look at the value at risk at 5% level of these portfolios:
 
