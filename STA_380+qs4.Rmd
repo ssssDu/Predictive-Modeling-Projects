@@ -1,0 +1,69 @@
+---
+title: "STA380_part2_hw1_qs2"
+author: "tester"
+date: "August 11, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r cars}
+# predictive modeling part2, 
+# r execise, qs2, greenhouse
+
+green_house = read.csv(choose.files())
+green_only = subset(green_house, green_rating==1)
+green.rent=rep(NA,length(unique(green_house$cluster)))
+avg.rent = rep(NA,length(unique(green_house$cluster)))
+for (i in 1:length(unique(green_house$cluster))){
+  index = which(green_house$cluster==unique(green_house$cluster)[i])
+  green.rent[i]=green_house$Rent[index]
+  avg.rent[i]=green_house$cluster_rent[index]
+}
+
+avg.increase = mean(green.rent-avg.rent)
+5000000/(2.999978*250000)
+# we need around 6.666716 years to recuperate the premium cost.
+```
+furthermore,  we extract all building with story 15 and find out those green buildings among 
+```{r}
+story_15 = subset(green_house, stories==15)
+non_green = subset(story_15, green_rating!=1)
+non_green_avg = mean(subset(non_green)$Rent)
+green=subset(story_15, green_rating==1)
+green_avg=mean(green$Rent)
+boxplot(green$Rent, non_green$Rent)
+
+green_avg-non_green_avg
+5000000/(8.668808*250000)
+# we need 2.307122 years to repay to cost
+plot(non_green$class_a,non_green$age)
+lala1=non_green[which(non_green$age<=20),]
+lala2=subset(lala1, class_a==1 | class_b==1)
+mean(lala2$Rent)
+mean(green$Rent)
+
+
+mean(lala2$leasing_rate)
+mean(green$leasing_rate)
+
+year_green=5000000/(250000*mean(green$leasing_rate)*0.01*(mean(green$Rent)-mean(lala2$Rent)))
+year_green
+
+boxplot(Rent~cluster, green_house)
+plot(green_house$leasing_rate,green_house$Rent)
+
+
+
+
+boxplot(Rent~cluster, green_only)
+green_only[,'profit_per_ft']=green_only[,'Rent']-green_only[,'cluster_rent']
+boxplot(green_only$profit_per_ft~green_only$cluster)
+abline(h=mean(green.rent-avg.rent))
+
+plot(green_only$leasing_rate, green_only$Rent)
+
+```
+
