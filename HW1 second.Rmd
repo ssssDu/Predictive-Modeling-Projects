@@ -426,7 +426,7 @@ print(apply(kmeanspp_sm8$centers,1,function(x) colnames(sm_new)[order(x, decreas
 kmeanspp_sm8$size
 
 ```
-After we look at the k mean ++ method, we concluded that when k = 5 or 6, the clustering result makes more sense to us. So we decided to go with this result.
+After we look at the k mean ++ method, we concluded that when k = 5, the clustering result makes more sense to us. So we decided to go with this result.
 ```{r}
 
 sum(kmeanspp_sm2$withinss)
@@ -443,14 +443,13 @@ sum(kmeanspp_sm8$withinss)
 sm_distance_matrix = dist(sm_new, method='euclidean')
 
 hier_sm = hclust(sm_distance_matrix, method='average')
-cluster1 = cutree(hier_sm, k=6)
+cluster1 = cutree(hier_sm, k=5)
 
 hier_sm2 = hclust(sm_distance_matrix, method='complete')
-cluster2 = cutree(hier_sm2, k=6)
+cluster2 = cutree(hier_sm2, k=5)
 
 hier_sm3 = hclust(sm_distance_matrix, method='single')
-cluster3 = cutree(hier_sm3, k=6)
-
+cluster3 = cutree(hier_sm3, k=5)
 summary(factor(cluster1))
 
 summary(factor(cluster2))
