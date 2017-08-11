@@ -117,12 +117,25 @@ plot(all_returns[,4], type='l',xlab="2007-2017",ylab="Risk free return（TLT）"
 plot(all_returns[,5], type='l',xlab="2007-2017",ylab="Daily Return_VNQ")
 
 ```
+First let us just to explore the data by looking at the mean and variance of each asset to get a roughly idea about their risk return properties:
+```{R}
+library(plotly)
+plot_ly(type='box', yaxis= list(range = c(-0.5, 0.5))) %>%
+  add_boxplot(y = all_returns[,3], name = 'SPY') %>%
+  add_boxplot(y = all_returns[,4], name = 'TLT') %>%
+  add_boxplot(y = all_returns[,2], name = 'LQD') %>%
+  add_boxplot(y = all_returns[,1], name = 'EEM') %>%
+  add_boxplot(y = all_returns[,5], name = 'VNQ') %>%
+  layout(
+    yaxis = list(range = c(-0.5,0.5)))
+```
+
+We can see through the graph that EEM and VNQ are with high volatility and rather high return and the TLT is just the most robust way of investing.
+Then let us see the sharp ratio for those assets first to get a more through measurement of these assets:
+
 * There are many ways to measure the performance of a certain asset. Here we choose the sharp ratio, Jensen's alpha and treynor ratio as examples.
 
 Note that sharp ratio is the ratio between extra mean return exceed risk free asset and the volitility of asset. 
-
-Let us see the sharp ratio for those assets first:
-
 ```{R}
 
 # First use TLT as an approximation to the risk free asset. Calculate the extra return of each asset:
@@ -145,21 +158,13 @@ SR_EEM=mean(EEM_extra_return)/EEM_SD
 SR_LQD=mean(LQD_extra_return)/LQD_SD
 SR_Market=mean(Market_extra_return)/Market_SD
 SR_VNQ=mean(VNQ_extra_return)/VNQ_SD
-
-```
-
-
-
-
-
-
-```{R}
 # now see the sharp ratio for these assets
 SR_EEM
 SR_LQD
 SR_Market
 SR_VNQ
 ```
+
 Actually here we see that LQD have a lower mean return than risk free asset, that probably suggest us not to invest in this asset since this performance is really terrible. EEM got the highest sharp ratio.
 
 
@@ -218,7 +223,7 @@ mean(sim1[,n_days]- initial_wealth)
 
 hist(sim1[,n_days]- initial_wealth, breaks=30)
 ```
-
+## The safer portfolio
 Next we have our safe portfolio as we invest more on the TLT and since we analysis that LQD is inefficient so we do not invest in it.
 
 
@@ -244,7 +249,7 @@ hist(sim2[,n_days]- initial_wealth, breaks=30)
 ```
 
 
-Then 
+Then the more aggressive one. In this one we choose to invest in more EEM which is a more risky asset.
 
 ```{R}
 set.seed(888)
@@ -266,9 +271,13 @@ sim3 = foreach(i=1:5000, .combine='rbind') %do% {
 mean(sim3[,n_days]- initial_wealth)
 hist(sim3[,n_days]- initial_wealth, breaks=30)
 ```
+Now let us look at the value at risk at 5% level of these portfolios:
+
 ```{R}
 quantile(sim1[,n_days], 0.05) - initial_wealth
 quantile(sim2[,n_days], 0.05) - initial_wealth
 quantile(sim3[,n_days], 0.05) - initial_wealth
 ```
 As we can see, here we have the value at risk of 5% for these three different portfolio with different style, and these numbers make sence as the aggressive one have the highest risk and the safe one is with the lowest risk.
+
+
