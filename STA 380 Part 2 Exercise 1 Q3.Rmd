@@ -1,0 +1,58 @@
+---
+title: "STA 380 Part 2 Exercise 1"
+author: "Lufang Liu"
+date: "8/9/2017"
+output: html_document
+---
+
+#Bootstrapping 
+
+```{r message=FALSE}
+library(mosaic)
+library(foreach)
+library(quantmod)
+```
+
+##Yahoo Market Price
+```{r message=FALSE}
+stocks = c('SPY','TLT', 'LQD', 'EEM', 'VNQ')
+getSymbols(stocks,src="yahoo")
+```
+
+##Daily Return of Each ETF
+```{r}
+for(ticker in stocks) {
+  expr = paste0(ticker, "a = adjustOHLC(", ticker, ")")
+  eval(parse(text=expr))
+}
+
+returns = cbind(ClCl(SPYa),ClCl(TLTa),ClCl(LQDa),ClCl(EEMa),ClCl(VNQa))
+returns_new = data.frame(na.omit(returns))
+```
+
+##Risk in Returns for Each ETF
+```{r}
+summary(returns_new)
+apply(returns_new, 2, sd)
+```
+
+```{r}
+plot_ly(type='box', yaxis= list(range = c(-0.5, 0.5))) %>%
+  add_boxplot(y = returns_new$ClCl.SPYa, name = 'SPY') %>%
+  add_boxplot(y = returns_new$ClCl.TLTa, name = 'TLT') %>%
+  add_boxplot(y = returns_new$ClCl.LQDa, name = 'LQD') %>%
+  add_boxplot(y = returns_new$ClCl.EEMa, name = 'EEM') %>%
+  add_boxplot(y = returns_new$ClCl.VNQa, name = 'VNQ') %>%
+  layout(
+    yaxis = list(range = c(-0.5,0.5)))
+```
+
+```{r}
+pairs(returns_new, upper.panel = NULL)
+cor(returns_new)
+```
+
+```{r}
+
+```
+
