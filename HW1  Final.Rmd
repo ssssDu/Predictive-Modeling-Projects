@@ -1,6 +1,6 @@
 ---
 title: "Homework1"
-author: "Lufang Liu"
+author: "Boying You, Daxi Cheng, Jianjie Zheng, Lufang Liu, Yixuan Du  "
 date: "8/6/2017"
 output:
   pdf_document: default
@@ -87,7 +87,11 @@ That is to say though the sensitivity and specificity of the test is really good
 
 
 # Exploratory analysis: green buildings
-```{r}
+
+Question:
+
+Actually, in order to find out the answer to this question and to determine whether having this new house as a green certificated house is a great option, we finished a lot of exploratory analysis focusing on comparing the greenhouse to the non green ones in a way that control the other factors constant. The most intuitive way of finishing this task would be running a regression, however if you run a regression you actually exclude all the other factors that may link to green house that contribute to the price, which is not the real scenario. In other words, we consider many features that associated with green house that can contribute to the price as some important effects that help us decide whether to have this certificate. So in this case we don't want to actually exclude these effects to find out the 'pure' effect of green house as we always do in a regression analysis, what we will do is just to compare them in a reasonable way. That is the whole picture and instructive idea of our work below:
+```{r,warning=FALSE}
 
 green_house = read.csv("~/Desktop/UT Austin/Predictive learning/greenbuildings.csv")
 green_only = subset(green_house, green_rating==1)
@@ -103,7 +107,10 @@ avg.increase = mean(green.rent-avg.rent)
 5000000/(2.999978*250000)
 # we need around 6.666716 years to recuperate the premium cost.
 ```
-furthermore,  we extract all building with story 15 and find out those green buildings among 
+We need to take into account about the indormation we do have about this house and only compare the houses in this way and leave the other factors as a set of different factor levels at different probabilities. Which is we look at the dataset we have as a random sample that could represent the whole population. Since there are a lot of feathers about the house that we don't know, what our group assume is just leave them as a probability distribution that the whole dataset can just be a well representative of. As for the information that we do know about this house, we compare the relative houses that have the same feature values.
+
+So what do we actually know about the building? First, it is with 15 story, and it is planning to be build so its age must be really small.
+Furthermore, we extract all building with story 15 and find out those buildings with relatively low age (since in the raw dataset there is rarely small number of ralatively new house so we loosen our condition a little bit)
 ```{r}
 story_15 = subset(green_house, stories==15)
 non_green = subset(story_15, green_rating!=1)
@@ -113,8 +120,7 @@ green_avg=mean(green$Rent)
 boxplot(green$Rent, non_green$Rent)
 
 green_avg-non_green_avg
-5000000/(8.668808*250000)
-# we need 2.307122 years to repay to cost
+
 plot(non_green$class_a,non_green$age)
 lala1=non_green[which(non_green$age<=20),]
 lala2=subset(lala1, class_a==1 | class_b==1)
@@ -142,10 +148,12 @@ abline(h=mean(green.rent-avg.rent))
 plot(green_only$leasing_rate, green_only$Rent)
 
 ```
+Here we can see we actually need 9.493097 years to get the investment on green certification back, which is differently from the estimation the guru provided.
+
 
 # Bootstrapping
 
-```{R}
+```{r,warning=FALSE}
 library(mosaic)
 library(quantmod)
 library(foreach)
@@ -368,7 +376,7 @@ Based on information provided about the data collection, we deem "uncategorized"
 
 ##K-means Clustering
 
-```{r}
+```{r, warning=FALSE}
 
 list= rep(NA, dim(sm_new)[2]-1)
 list2= rep(NA, dim(sm_new)[2]-1)
@@ -501,15 +509,18 @@ wpp8=sum(kmeanspp_sm8$withinss)
 k=c(2,3,4,5,6,7,8)
 w=c(w2,w3,w4,w5,w6,w7,w8)
 wpp=c(wpp2,wpp3,wpp4,wpp5,wpp6,wpp7,wpp8)
-plot(w ~ k,type='b',co="red")
-par(new=TRUE)
-plot(wpp ~ k,type='b',co="red")
+plot(w ~ k,type='b',col="red")
+
 
 ```
+```{R}
+plot(wpp ~ k,type='b',col="red")
+```
+
 Similar to patterns identified in kmeans approach, we found the most meaningful kmeans++ model to be the one with k=5. Compared to the kmeans model with k=5, the total within-cluster sum of squares is reduced. Believing, k=5 is the most practical number of clusters, we further tried out a few hierarchical clustering models with different linkage methods.
 
 ## hierarchical clustering models with k=5
-```{r}
+```{r, warning=FALSE}
 sm_distance_matrix = dist(sm_new, method='euclidean')
 
 hier_sm = hclust(sm_distance_matrix, method='average')
@@ -537,7 +548,7 @@ plot(hier_sm3, cex=0.3)
 ```
 We tried hierarchical clustering models for k=5 for min, max and average methods and found out they do not produce meaningful business results in this case because most of the data points lie under cluster 1 (see the Cluster Dendrograms ablove). Finally, kemans++ with k=5 was chosen as our best model. We visualized the name of each category within each cluster ordered and colored by its frequency in the step below:
 
-```{R}
+```{r,warning=FALSE}
 set.seed(1)
 require("RColorBrewer")
 wordcloud(colnames(sm_sub),kmeanspp_sm5$centers[1,],min.freq=0,max.words=1000, colors = rainbow(32),ordered.colors = TRUE) 
