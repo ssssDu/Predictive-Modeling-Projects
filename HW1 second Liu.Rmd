@@ -1,0 +1,572 @@
+---
+title: "Homework1"
+author: "Lufang Liu"
+date: "8/6/2017"
+output:
+  pdf_document: default
+  html_document: default
+always_allow_html: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is the homework 1 for the second part of STA380 in Red McCombs business school.
+
+
+
+# Statistics Questions:
+
+## Question 1 
+
+
+From the question we know that:
+
+P(RC)=0.3
+
+P(TC)=1-P(RC)=0.7 since TC is the complement of RC
+
+P(Y)=0.65
+
+P(Y|RC)=0.5
+
+Where RC denotes that the clicker is a random clicker, TC denotes the clicker is a truthful clicker and Y denotes the result is yes.
+
+And we want to know P(Y|TC).
+
+Solution:
+
+P(Y,RC)=P(Y|RC)\*P(RC)=0.5\*0.3=0.15
+
+P(Y,TC)=P(Y)-P(Y,RC)=0.65-0.15=0.5 since TC is the complement of RC
+
+so P(Y|TC)=P(Y,TC)/P(TC)=0.5/0.7=0.7142857
+
+
+
+## Question 2
+
+From the question we know that:
+
+P(P|D)=0.993
+
+P(N|Dc)=0.9999
+
+P(D)=0.000025
+
+Where D denotes with desease, Dc denotes no desease, P denotes positive and N denotes negative.
+
+We want to know: P(D|P)
+
+Solution:
+
+since we know Dc is the complement of D 
+
+so P(Dc)=1-P(D)=0.999975 and P(P)=P(Dc,P)+P(D,P)
+
+and N is the complement of P 
+
+so P(P|Dc)=1-P(N|Dc)=0.0001
+
+
+P(D|P)=P(D,P)/P(P)
+
+=(P(P|D)\*P(D))/(P(D,P)+P(Dc,P))
+
+=(P(P|D)\*P(D))/(P(P|D)\*P(D)+P(Dc,P)\*P(Dc))
+
+=0.993\*0.000025/(0.993\*0.000025+0.0001\*0.999975)=0.1988824
+
+Which is really high! 
+
+That is to say though the sensitivity and specificity of the test is really good, due to the fact that the prior probability of desease is so low as 0.000025, the false positive rate is still really high. This kind of implementing a universal testing policy for the disease will lead to panic and chaos.
+
+
+
+# Exploratory analysis: green buildings
+```{r}
+
+green_house = read.csv("~/Desktop/UT Austin/Predictive learning/greenbuildings.csv")
+green_only = subset(green_house, green_rating==1)
+green.rent=rep(NA,length(unique(green_house$cluster)))
+avg.rent = rep(NA,length(unique(green_house$cluster)))
+for (i in 1:length(unique(green_house$cluster))){
+  index = which(green_house$cluster==unique(green_house$cluster)[i])
+  green.rent[i]=green_house$Rent[index]
+  avg.rent[i]=green_house$cluster_rent[index]
+}
+
+avg.increase = mean(green.rent-avg.rent)
+5000000/(2.999978*250000)
+# we need around 6.666716 years to recuperate the premium cost.
+```
+furthermore,  we extract all building with story 15 and find out those green buildings among 
+```{r}
+story_15 = subset(green_house, stories==15)
+non_green = subset(story_15, green_rating!=1)
+non_green_avg = mean(subset(non_green)$Rent)
+green=subset(story_15, green_rating==1)
+green_avg=mean(green$Rent)
+boxplot(green$Rent, non_green$Rent)
+
+green_avg-non_green_avg
+5000000/(8.668808*250000)
+# we need 2.307122 years to repay to cost
+plot(non_green$class_a,non_green$age)
+lala1=non_green[which(non_green$age<=20),]
+lala2=subset(lala1, class_a==1 | class_b==1)
+mean(lala2$Rent)
+mean(green$Rent)
+
+
+mean(lala2$leasing_rate)
+mean(green$leasing_rate)
+
+year_green=5000000/(250000*mean(green$leasing_rate)*0.01*(mean(green$Rent)-mean(lala2$Rent)))
+year_green
+
+boxplot(Rent~cluster, green_house)
+plot(green_house$leasing_rate,green_house$Rent)
+
+
+
+
+boxplot(Rent~cluster, green_only)
+green_only[,'profit_per_ft']=green_only[,'Rent']-green_only[,'cluster_rent']
+boxplot(green_only$profit_per_ft~green_only$cluster)
+abline(h=mean(green.rent-avg.rent))
+
+plot(green_only$leasing_rate, green_only$Rent)
+
+```
+
+# Bootstrapping
+
+```{R}
+library(mosaic)
+library(quantmod)
+library(foreach)
+mystocks = c("SPY", "TLT", "LQD","EEM","VNQ")
+getSymbols(mystocks)
+
+```
+
+```{R}
+
+EEMa = adjustOHLC(EEM)
+LQDa = adjustOHLC(LQD)
+SPYa = adjustOHLC(SPY)
+TLTa = adjustOHLC(TLT)
+VNQa = adjustOHLC(VNQ)
+
+all_returns = cbind(ClCl(EEMa),ClCl(LQDa),ClCl(SPYa),ClCl(TLTa),ClCl(VNQa))
+all_returns = as.matrix(na.omit(all_returns))
+par(mfrow=c(2,3))
+plot(all_returns[,1], type='l',xlab="2007-2017",ylab="Daily Return_EEM")
+plot(all_returns[,2], type='l',xlab="2007-2017",ylab="Daily Return_LQD")
+plot(all_returns[,3], type='l',xlab="2007-2017",ylab="Market return(S&P)")
+plot(all_returns[,4], type='l',xlab="2007-2017",ylab="risk free return")
+plot(all_returns[,5], type='l',xlab="2007-2017",ylab="Daily Return_VNQ")
+
+```
+First let us just to explore the data by looking at the mean and variance of each asset to get a roughly idea about their risk return properties:
+```{R}
+boxplot(all_returns,outline=FALSE,col=rainbow(5),ylab='Return')
+
+
+library(plotly)
+plot_ly(type='box', yaxis= list(range = c(-0.5, 0.5))) %>%
+  add_boxplot(y = all_returns[,3], name = 'SPY') %>%
+  add_boxplot(y = all_returns[,4], name = 'TLT') %>%
+  add_boxplot(y = all_returns[,2], name = 'LQD') %>%
+  add_boxplot(y = all_returns[,1], name = 'EEM') %>%
+  add_boxplot(y = all_returns[,5], name = 'VNQ') %>%
+  layout(
+    yaxis = list(range = c(-0.5,0.5)))
+```
+
+We can see through the graph that EEM and VNQ are with high volatility and rather high return and the TLT is just the most robust way of investing.
+Then let us see the sharp ratio for those assets first to get a more through measurement of these assets:
+
+* There are many ways to measure the performance of a certain asset. Here we choose the sharp ratio, Jensen's alpha and treynor ratio as examples.
+
+Note that sharp ratio is the ratio between extra mean return exceed risk free asset and the volitility of asset. 
+
+First use TLT as an approximation to the risk free asset. Calculate the extra return of each asset:
+```{R}
+
+EEMa = adjustOHLC(EEM)
+LQDa = adjustOHLC(LQD)
+SPYa = adjustOHLC(SPY)
+TLTa = adjustOHLC(TLT)
+VNQa = adjustOHLC(VNQ)
+EEM_extra_return=all_returns[,1]-all_returns[,4]
+LQD_extra_return=all_returns[,2]-all_returns[,4]
+Market_extra_return=all_returns[,3]-all_returns[,4]
+VNQ_extra_return=all_returns[,5]-all_returns[,4]
+
+EEM_SD=sd(EEM_extra_return)
+LQD_SD=sd(LQD_extra_return)
+Market_SD=sd(Market_extra_return)
+VNQ_SD=sd(VNQ_extra_return)
+
+SR_EEM=mean(EEM_extra_return)/EEM_SD
+SR_LQD=mean(LQD_extra_return)/LQD_SD
+SR_Market=mean(Market_extra_return)/Market_SD
+SR_VNQ=mean(VNQ_extra_return)/VNQ_SD
+
+SR_EEM
+SR_LQD
+SR_Market
+SR_VNQ
+```
+
+Actually here we see that LQD have a lower mean return than risk free asset, that probably suggest us not to invest in this asset since this performance is really terrible. EEM got the highest sharp ratio.
+
+
+Then we look at Jensen's alpha:
+
+Jensen's alpha is a measurement of the return after adjusting by taking risk into account.
+
+Fit the data with a CAPM model first:
+
+```{R}
+lmEEM=lm(EEM_extra_return~Market_extra_return)
+lmLQD=lm(LQD_extra_return~Market_extra_return)
+lmVNQ=lm(VNQ_extra_return~Market_extra_return)
+coef(lmEEM)
+coef(lmLQD)
+coef(lmVNQ)
+```
+The alpha and beta are intercept and beta in this particular case.
+
+We can see that EEM get the highest alpha while VNQ get the lowest.
+
+Then let us look at the treynor ratio:
+```{R}
+TR_EEM=mean(EEM_extra_return)/coef(lmEEM)[2]
+TR_LQD=mean(LQD_extra_return)/coef(lmLQD)[2]
+TR_VNQ=mean(VNQ_extra_return)/coef(lmVNQ)[2]
+
+TR_EEM
+TR_LQD
+TR_VNQ
+```
+We can see here that EEM is with the highest treynor ratio.
+
+
+Now we begin the boostrapping simulation.
+
+## The even split one
+```{R}
+set.seed(888)
+initial_wealth = 10000
+sim1 = foreach(i=1:500, .combine='rbind') %do% {
+	total_wealth = initial_wealth
+	weights = c(0.2, 0.2, 0.2, 0.2, 0.2)
+	holdings = weights * total_wealth
+	n_days = 20
+	wealthtracker = rep(0, n_days)
+	for(today in 1:n_days) {
+		return.today = resample(all_returns, 1, orig.ids=FALSE)
+		holdings = holdings + holdings*return.today
+		total_wealth = sum(holdings)
+		wealthtracker[today] = total_wealth
+	}
+	wealthtracker
+}
+mean(sim1[,n_days]- initial_wealth)
+hist(main = 'The even split portfolio return',sim1[,n_days]- initial_wealth, breaks=30)
+
+
+```
+## The safer portfolio
+Next we have our safe portfolio as we invest more on the TLT and since we analysis that LQD is inefficient so we do not invest in it.
+
+
+```{R}
+set.seed(888)
+initial_wealth = 10000
+sim2 = foreach(i=1:500, .combine='rbind') %do% {
+	total_wealth = initial_wealth
+	weights = c(0.1, 0, 0.1, 0.7, 0.1)
+	holdings = weights * total_wealth
+	n_days = 20
+	wealthtracker = rep(0, n_days)
+	for(today in 1:n_days) {
+		return.today = resample(all_returns, 1, orig.ids=FALSE)
+		holdings = holdings + holdings*return.today
+		total_wealth = sum(holdings)
+		wealthtracker[today] = total_wealth
+	}
+	wealthtracker
+}
+mean(sim2[,n_days]- initial_wealth)
+hist(main = 'The safer portfolio return',sim2[,n_days]- initial_wealth, breaks=30)
+
+```
+
+
+## The more aggressive one. 
+
+In this one we choose to invest in more EEM which is a more risky asset.
+
+```{R}
+set.seed(888)
+initial_wealth = 10000
+sim3 = foreach(i=1:500, .combine='rbind') %do% {
+	total_wealth = initial_wealth
+	weights = c(0.6, 0, 0.1, 0.1, 0.1)
+	holdings = weights * total_wealth
+	n_days = 20
+	wealthtracker = rep(0, n_days)
+	for(today in 1:n_days) {
+		return.today = resample(all_returns, 1, orig.ids=FALSE)
+		holdings = holdings + holdings*return.today
+		total_wealth = sum(holdings)
+		wealthtracker[today] = total_wealth
+	}
+	wealthtracker
+}
+mean(sim3[,n_days]- initial_wealth)
+hist(main = 'The more aggressive portfolio return',sim3[,n_days]- initial_wealth, breaks=30)
+```
+Now let us look at the value at risk at 5% level of these portfolios:
+
+```{R}
+quantile(sim1[,n_days], 0.05) - initial_wealth
+quantile(sim2[,n_days], 0.05) - initial_wealth
+quantile(sim3[,n_days], 0.05) - initial_wealth
+```
+As we can see, here we have the value at risk of 5% for these three different portfolio with different style, and these numbers make sence as the aggressive one have the highest risk and the safe one is with the lowest risk.
+
+
+#Market segmentation
+
+```{r message=FALSE}
+library(pander)
+library(ggplot2)
+library(LICORS)
+library(foreach)
+library(mosaic)
+library(gridExtra)
+library(wordcloud)
+```
+
+##Data Cleaning
+
+```{r}
+sm = read.csv("~/Desktop/UT Austin/Predictive learning/social_marketing.csv")
+sm_1 = subset(sm, select = -c(X,uncategorized, spam, adult, chatter))
+sm_sub=sm_1/rowSums(sm_1)
+sm_new = scale(sm_sub, center=TRUE, scale=TRUE)
+```
+Based on information provided about the data collection, we deem "uncategorized", "spam", "adult", and "chatter" as incomplete or irrelevant, therefore we deleted them from the original data set. Then, we normalized each data entry from count to frequency and standardized each data entry. 
+
+##K-means Clustering
+
+```{r}
+
+list= rep(NA, dim(sm_new)[2]-1)
+list2= rep(NA, dim(sm_new)[2]-1)
+
+set.seed(1)
+for ( i in 2:dim(sm_new)[2]){
+  list[i-1]=kmeans(sm_new, i , nstart = 50)$betweenss/ kmeans(sm_new, i , nstart = 50)$tot.withinss *(dim(sm_new)[1]-i)/(i-1)
+  list2[i-1]=kmeans(sm_new, i , nstart = 50)$tot.withinss
+}
+
+par(mfrow=c(1,2))
+plot(list ~ c(2:32), type='b', xlab = 'number of K', ylab = 'CH(K)')
+plot(list2 ~ c(2:32), type='b',xlab='number of k',ylab='W(k)')
+
+```
+Since there are 32 variables in the new data set, we calculated CH(K) (Calinski-Harabasz criterion) and W(K) (total within-cluster sum of squares) at different k ranging from k=2 to k=32 while holding the numebr of centers to be 50. As a result, we found that the maximum CH at k=3 and the minimum W at k at 32. However, if were to build a kmeans clustering model based on either k=3 or k=32, would we be able to find any useful pattern among each cluster in order to better understand NutrientH20's social-media audience? In the following steps, we tried to answer this question by subjectively evaluating categories contained within each cluster.
+
+## K means for k=2 to k=8
+```{r}
+set.seed(1)
+kmeans_sm2<- kmeans(sm_new, 2, nstart = 50)
+print(apply(kmeans_sm2$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm2$size
+```
+```{r}
+set.seed(1)
+kmeans_sm3<- kmeans(sm_new, 3, nstart = 50)
+print(apply(kmeans_sm3$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm3$size
+```
+```{r}
+set.seed(1)
+kmeans_sm4<- kmeans(sm_new, 4, nstart = 50)
+print(apply(kmeans_sm4$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm4$size
+```
+```{r}
+set.seed(1)
+kmeans_sm5<- kmeans(sm_new, 5, nstart = 50)
+print(apply(kmeans_sm5$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm5$size
+```
+```{r}
+set.seed(1)
+kmeans_sm6<- kmeans(sm_new, 6, nstart = 50)
+print(apply(kmeans_sm6$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm6$size
+```
+```{r}
+set.seed(1)
+kmeans_sm7<- kmeans(sm_new, 7, nstart = 50)
+print(apply(kmeans_sm7$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm7$size
+```
+```{r}
+set.seed(1)
+kmeans_sm8<- kmeans(sm_new, 8, nstart = 50)
+print(apply(kmeans_sm8$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm8$size
+```
+One can see from the output at each of step, as k increases from 2 to 6, categories in each cluster start to show patterns which can be picked up by business intuition. When k=5 and k=6, we can almost associate each clsuter to a specific customer group in the business context. However, as k continues to grow from 6 and on, we see more catergories overlappig among clusters and patterns start to disappear. For model simplicity, we believe the best kmeans model is at k=5. But can we we optimize the model by minimizing the total within-cluster sum of squares? To answer this, we tried kmeans++ which initializes the cluster centers before proceeding with the standard kmeans. This time, we only tested kmeans++ with k=2 to k=8. 
+
+## K means ++ for k=2 to k=8
+```{r}
+set.seed(1)
+kmeanspp_sm2<- kmeanspp(sm_new, 2)
+print(apply(kmeanspp_sm2$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeanspp_sm2$size
+```
+
+```{r}
+set.seed(1)
+kmeanspp_sm3<- kmeanspp(sm_new, 3)
+print(apply(kmeanspp_sm3$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeanspp_sm3$size
+```
+
+```{r}
+set.seed(1)
+kmeanspp_sm4<- kmeanspp(sm_new, 4)
+print(apply(kmeanspp_sm4$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeanspp_sm4$size
+```
+
+```{r}
+set.seed(1)
+kmeanspp_sm5<- kmeanspp(sm_new, 5)
+print(apply(kmeanspp_sm5$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeanspp_sm5$size
+```
+
+```{r}
+set.seed(1)
+kmeanspp_sm6<- kmeanspp(sm_new, 6)
+print(apply(kmeanspp_sm6$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeanspp_sm6$size
+```
+
+```{r}
+set.seed(1)
+kmeanspp_sm7<- kmeanspp(sm_new, 7)
+print(apply(kmeanspp_sm7$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeanspp_sm7$size
+```
+
+```{r}
+set.seed(1)
+kmeanspp_sm8<- kmeanspp(sm_new, 8)
+print(apply(kmeanspp_sm8$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeanspp_sm8$size
+
+```
+
+```{r}
+w2=sum(kmeans_sm2$withinss)
+w3=sum(kmeans_sm3$withinss)
+w4=sum(kmeans_sm4$withinss)
+w5=sum(kmeans_sm5$withinss)
+w6=sum(kmeans_sm6$withinss)
+w7=sum(kmeans_sm7$withinss)
+w8=sum(kmeans_sm8$withinss)
+wpp2=sum(kmeanspp_sm2$withinss)
+wpp3=sum(kmeanspp_sm3$withinss)
+wpp4=sum(kmeanspp_sm4$withinss)
+wpp5=sum(kmeanspp_sm5$withinss)
+wpp6=sum(kmeanspp_sm6$withinss)
+wpp7=sum(kmeanspp_sm7$withinss)
+wpp8=sum(kmeanspp_sm8$withinss)
+
+k=c(2,3,4,5,6,7,8)
+w=c(w2,w3,w4,w5,w6,w7,w8)
+wpp=c(wpp2,wpp3,wpp4,wpp5,wpp6,wpp7,wpp8)
+plot(w ~ k,type='b',co="red")
+par(new=TRUE)
+plot(wpp ~ k,type='b',co="red")
+
+```
+Similar to patterns identified in kmeans approach, we found the most meaningful kmeans++ model to be the one with k=5. Compared to the kmeans model with k=5, the total within-cluster sum of squares is reduced. Believing, k=5 is the most practical number of clusters, we further tried out a few hierarchical clustering models with different linkage methods.
+
+## hierarchical clustering models with k=5
+```{r}
+sm_distance_matrix = dist(sm_new, method='euclidean')
+
+hier_sm = hclust(sm_distance_matrix, method='average')
+cluster1 = cutree(hier_sm, k=5)
+
+hier_sm2 = hclust(sm_distance_matrix, method='complete')
+cluster2 = cutree(hier_sm2, k=5)
+
+hier_sm3 = hclust(sm_distance_matrix, method='single')
+cluster3 = cutree(hier_sm3, k=5)
+summary(factor(cluster1))
+
+summary(factor(cluster2))
+
+summary(factor(cluster3))
+```
+
+```{r}
+plot(hier_sm, cex=0.3)
+
+plot(hier_sm2, cex=0.3)
+
+plot(hier_sm3, cex=0.3)
+
+```
+We tried hierarchical clustering models for k=5 for min, max and average methods and found out they do not produce meaningful business results in this case because most of the data points lie under cluster 1 (see the Cluster Dendrograms ablove). Finally, kemans++ with k=5 was chosen as our best model. We visualized the name of each category within each cluster ordered and colored by its frequency in the step below:
+
+```{R}
+set.seed(1)
+require("RColorBrewer")
+wordcloud(colnames(sm_sub),kmeanspp_sm5$centers[1,],min.freq=0,max.words=1000, colors = rainbow(32),ordered.colors = TRUE) 
+wordcloud(colnames(sm_sub),kmeanspp_sm5$centers[2,],min.freq=0,max.words=1000, colors = rainbow(32),ordered.colors = TRUE) 
+wordcloud(colnames(sm_sub),kmeanspp_sm5$centers[3,],min.freq=0,max.words=1000, colors = rainbow(32),ordered.colors = TRUE) 
+wordcloud(colnames(sm_sub),kmeanspp_sm5$centers[4,],min.freq=0,max.words=1000, colors = rainbow(32),ordered.colors = TRUE) 
+wordcloud(colnames(sm_sub),kmeanspp_sm5$centers[5,],min.freq=0,max.words=1000, colors = rainbow(32),ordered.colors = TRUE) 
+```
+
+####Here is a summary showing our understanding of each cluster identified through our best model:
+
+####Cluster1: These twitter followers are most likely to be middle-aged parents.
+
+####Cluster2: These twitter followers are well-educated and newly married white-collar workers who enjoy travelling and buying                   high-end consumer goods.
+
+####Cluster3: These twitter followers are most likely to be young colleage students who really care about appreance and enjoy                    playing sports and online games.
+
+####Cluster4: These twitter followers are young working professionals who love outdoor activities and pursue high living standards.
+
+####Cluster5: These twitter followers are most likely to be young small business owners who focus cultural and artistic goods.
+
+####The followings are our marketing strategy recommendations:
+
+####Cluster1: The company could post family-related contents such as popular parenting books to appeal to this segment.
+
+####Cluster2: The company could post promotions related to international travel and high-end nutritions supplement.
+
+####Cluster3: The company could post contents related to recipe, beauty, and shopping.
+
+####Cluster4: The company could post latest outdoors activites.
+
+####Cluster5: The company could post art-related contents.
