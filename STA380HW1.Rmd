@@ -1,6 +1,6 @@
 ---
-title: "Homework1"
-author: "Jack Cheng"
+title: "STA 380 Homework1"
+author: 'Boying You, Daxi Cheng, Jianjie Zheng, Lufang Liu, Yixuan Du  '
 date: "8/6/2017"
 output:
   pdf_document: default
@@ -148,12 +148,13 @@ abline(h=mean(green.rent-avg.rent))
 plot(green_only$leasing_rate, green_only$Rent)
 
 ```
+
 Here we can see we actually need 9.493097 years to get the investment on green certification back, which is differently from the estimation the guru provided.
 
 
 # Bootstrapping
 
-```{R}
+```{r, warning=FALSE}
 library(mosaic)
 library(quantmod)
 library(foreach)
@@ -162,7 +163,7 @@ getSymbols(mystocks)
 
 ```
 
-```{R}
+```{r, warning=FALSE}
 
 EEMa = adjustOHLC(EEM)
 LQDa = adjustOHLC(LQD)
@@ -180,8 +181,12 @@ plot(all_returns[,4], type='l',xlab="2007-2017",ylab="risk free return")
 plot(all_returns[,5], type='l',xlab="2007-2017",ylab="Daily Return_VNQ")
 
 ```
+
+
 First let us just to explore the data by looking at the mean and variance of each asset to get a roughly idea about their risk return properties:
-```{R}
+
+
+```{r, warning=FALSE}
 boxplot(all_returns,outline=FALSE,col=rainbow(5),ylab='Return')
 
 
@@ -197,6 +202,7 @@ plot_ly(type='box', yaxis= list(range = c(-0.5, 0.5))) %>%
 ```
 
 We can see through the graph that EEM and VNQ are with high volatility and rather high return and the TLT is just the most robust way of investing.
+
 Then let us see the sharp ratio for those assets first to get a more through measurement of these assets:
 
 * There are many ways to measure the performance of a certain asset. Here we choose the sharp ratio, Jensen's alpha and treynor ratio as examples.
@@ -204,7 +210,8 @@ Then let us see the sharp ratio for those assets first to get a more through mea
 Note that sharp ratio is the ratio between extra mean return exceed risk free asset and the volitility of asset. 
 
 First use TLT as an approximation to the risk free asset. Calculate the extra return of each asset:
-```{R}
+
+```{r,warning=FALSE}
 
 EEMa = adjustOHLC(EEM)
 LQDa = adjustOHLC(LQD)
@@ -254,6 +261,7 @@ The alpha and beta are intercept and beta in this particular case.
 We can see that EEM get the highest alpha while VNQ get the lowest.
 
 Then let us look at the treynor ratio:
+
 ```{R}
 TR_EEM=mean(EEM_extra_return)/coef(lmEEM)[2]
 TR_LQD=mean(LQD_extra_return)/coef(lmLQD)[2]
@@ -269,6 +277,7 @@ We can see here that EEM is with the highest treynor ratio.
 Now we begin the boostrapping simulation.
 
 ## The even split one
+
 ```{R}
 set.seed(888)
 initial_wealth = 10000
@@ -291,7 +300,9 @@ hist(main = 'The even split portfolio return',sim1[,n_days]- initial_wealth, bre
 
 
 ```
-## The safer portfolio
+
+## The safer one
+
 Next we have our safe portfolio as we invest more on the TLT and since we analysis that LQD is inefficient so we do not invest in it.
 
 
@@ -342,6 +353,7 @@ sim3 = foreach(i=1:500, .combine='rbind') %do% {
 mean(sim3[,n_days]- initial_wealth)
 hist(main = 'The more aggressive portfolio return',sim3[,n_days]- initial_wealth, breaks=30)
 ```
+
 Now let us look at the value at risk at 5% level of these portfolios:
 
 ```{R}
@@ -349,7 +361,9 @@ quantile(sim1[,n_days], 0.05) - initial_wealth
 quantile(sim2[,n_days], 0.05) - initial_wealth
 quantile(sim3[,n_days], 0.05) - initial_wealth
 ```
-As we can see, here we have the value at risk of 5% for these three different portfolio with different style, and these numbers make sence as the aggressive one have the highest risk and the safe one is with the lowest risk.
+
+As we can see, here we have the value at risk of 5% for these three different portfolio with different style, and 
+these numbers make sence as the aggressive one have the highest risk and the safe one is with the lowest risk.
 
 
 #Market segmentation
@@ -372,18 +386,22 @@ sm_1 = subset(sm, select = -c(X,uncategorized, spam, adult, chatter))
 sm_sub=sm_1/rowSums(sm_1)
 sm_new = scale(sm_sub, center=TRUE, scale=TRUE)
 ```
+Based on information provided about the data collection, we deem "uncategorized", "spam", "adult", and "chatter" as incomplete or irrelevant, therefore we deleted them from the original data set. Then, we normalized each data entry from count to frequency and standardized each data entry. 
 
 ##K-means Clustering
 
-```{r,warning=FALSE}
+```{r, warning=FALSE}
 
 list= rep(NA, dim(sm_new)[2]-1)
 list2= rep(NA, dim(sm_new)[2]-1)
 
 set.seed(1)
 for ( i in 2:dim(sm_new)[2]){
-  list[i-1]=kmeans(sm_new, i , nstart = 50)$betweenss/ kmeans(sm_new, i , nstart = 50)$tot.withinss *(dim(sm_new)[1]-i)/(i-1)
-  list2[i-1]=kmeans(sm_new, i , nstart = 50)$tot.withinss
+  aux1=kmeans(sm_new, i , nstart = 50)$betweenss
+  aux2=kmeans(sm_new, i , nstart = 50)$tot.withinss
+  aux3=(dim(sm_new)[1]-i)/(i-1)
+  list[i-1]=aux1/(aux2*aux3) 
+  list2[i-1]=kmeans(sm_new,i,nstart = 50)$tot.withinss
 }
 
 par(mfrow=c(1,2))
@@ -391,117 +409,197 @@ plot(list ~ c(2:32), type='b', xlab = 'number of K', ylab = 'CH(K)')
 plot(list2 ~ c(2:32), type='b',xlab='number of k',ylab='W(k)')
 
 ```
-So based on the graphs above, we are able to see the relationship between number of K and CH(K) and W(K) respectively. As the number of K increases, both values of CH(K) and W(K) decrease. Since we could only have 32 clusters for 32 variables, we tried different K from k=2 to k=32 and find out that CH(K) and W(K) are at minimum when K=32. However, this does not make sense to us since K=32 is too large and we would have same variables in different clusters.
 
+Since there are 32 variables in the new data set, we calculated CH(K) (Calinski-Harabasz criterion) and W(K) (total within-cluster sum of squares) at different k ranging from k=2 to k=32 while holding the numebr of centers to be 50. 
+
+As a result, we found that the maximum CH at k=3 and the minimum W at k at 32. However, if were to build a kmeans clustering model based on either k=3 or k=32, would we be able to find any useful pattern among each cluster in order to better understand NutrientH20's social-media audience? 
+
+In the following steps, we tried to answer this question by subjectively evaluating categories contained within each cluster.
 
 ## K means for k=2 to k=8
 ```{r}
 set.seed(1)
 kmeans_sm2<- kmeans(sm_new, 2, nstart = 50)
-print(apply(kmeans_sm2$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+print(apply(kmeans_sm2$centers,1,function(x) 
+  colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
 kmeans_sm2$size
 ```
 ```{r}
 set.seed(1)
 kmeans_sm3<- kmeans(sm_new, 3, nstart = 50)
-print(apply(kmeans_sm3$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+print(apply(kmeans_sm3$centers,1,function(x) 
+  colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
 kmeans_sm3$size
 ```
 ```{r}
 set.seed(1)
 kmeans_sm4<- kmeans(sm_new, 4, nstart = 50)
-print(apply(kmeans_sm4$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+print(apply(kmeans_sm4$centers,1,function(x) 
+  colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
 kmeans_sm4$size
 ```
 ```{r}
 set.seed(1)
-kmeans_sm5<- kmeans(sm_new, 5, nstart = 50)
-print(apply(kmeans_sm5$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeans_sm5<- kmeans(sm_new,5, nstart = 50)
+print(apply(kmeans_sm5$centers,1,function(x) 
+  colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
 kmeans_sm5$size
 ```
 ```{r}
 set.seed(1)
 kmeans_sm6<- kmeans(sm_new, 6, nstart = 50)
-print(apply(kmeans_sm6$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+print(apply(kmeans_sm6$centers,1,function(x) 
+  colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
 kmeans_sm6$size
 ```
 ```{r}
 set.seed(1)
 kmeans_sm7<- kmeans(sm_new, 7, nstart = 50)
-print(apply(kmeans_sm7$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+print(apply(kmeans_sm7$centers,1,function(x) 
+  colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
 kmeans_sm7$size
 ```
-
 ```{r}
 set.seed(1)
 kmeans_sm8<- kmeans(sm_new, 8, nstart = 50)
-print(apply(kmeans_sm8$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+print(apply(kmeans_sm8$centers,1,function(x) 
+  colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
 kmeans_sm8$size
 ```
+One can see from the output at each of step, as k increases from 2 to 6, categories in each cluster start to show patterns which can be picked up by business intuition. 
+
+When k=5 and k=6, we can almost associate each clsuter to a specific customer group in the business context. 
+
+However, as k continues to grow from 6 and on, we see more catergories overlappig among clusters and patterns start to disappear. For model simplicity, we believe the best kmeans model is at k=5. But can we we optimize the model by minimizing the total within-cluster sum of squares? 
+
+To answer this, we tried kmeans++ which initializes the cluster centers before proceeding with the standard kmeans. This time, we only tested kmeans++ with k=2 to k=8. 
+
 ## K means ++ for k=2 to k=8
 ```{r}
 set.seed(1)
 kmeanspp_sm2<- kmeanspp(sm_new, 2)
-print(apply(kmeanspp_sm2$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+print(apply(kmeanspp_sm2$centers,1,function(x) 
+  colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
 kmeanspp_sm2$size
 ```
 
 ```{r}
 set.seed(1)
 kmeanspp_sm3<- kmeanspp(sm_new, 3)
-print(apply(kmeanspp_sm3$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+print(apply(kmeanspp_sm3$centers,1,function(x) 
+  colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
 kmeanspp_sm3$size
 ```
 
 ```{r}
 set.seed(1)
 kmeanspp_sm4<- kmeanspp(sm_new, 4)
-print(apply(kmeanspp_sm4$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+print(apply(kmeanspp_sm4$centers,1,function(x) 
+  colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
 kmeanspp_sm4$size
 ```
 
 ```{r}
 set.seed(1)
 kmeanspp_sm5<- kmeanspp(sm_new, 5)
-print(apply(kmeanspp_sm5$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+print(apply(kmeanspp_sm5$centers,1,function(x) 
+  colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
 kmeanspp_sm5$size
 ```
 
 ```{r}
 set.seed(1)
 kmeanspp_sm6<- kmeanspp(sm_new, 6)
-print(apply(kmeanspp_sm6$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+print(apply(kmeanspp_sm6$centers,1,function(x) 
+  colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
 kmeanspp_sm6$size
 ```
 
 ```{r}
 set.seed(1)
 kmeanspp_sm7<- kmeanspp(sm_new, 7)
-print(apply(kmeanspp_sm7$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+print(apply(kmeanspp_sm7$centers,1,function(x) 
+  colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
 kmeanspp_sm7$size
 ```
 
 ```{r}
 set.seed(1)
 kmeanspp_sm8<- kmeanspp(sm_new, 8)
-print(apply(kmeanspp_sm8$centers,1,function(x) colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+print(apply(kmeanspp_sm8$centers,1,function(x) 
+  colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
 kmeanspp_sm8$size
 
 ```
-After we look at the k mean ++ method, we concluded that when k = 5, the clustering result makes more sense to us. So we decided to go with this result.
+
+```{r}
+w2=sum(kmeans_sm2$withinss)
+w3=sum(kmeans_sm3$withinss)
+w4=sum(kmeans_sm4$withinss)
+w5=sum(kmeans_sm5$withinss)
+w6=sum(kmeans_sm6$withinss)
+w7=sum(kmeans_sm7$withinss)
+w8=sum(kmeans_sm8$withinss)
+wpp2=sum(kmeanspp_sm2$withinss)
+wpp3=sum(kmeanspp_sm3$withinss)
+wpp4=sum(kmeanspp_sm4$withinss)
+wpp5=sum(kmeanspp_sm5$withinss)
+wpp6=sum(kmeanspp_sm6$withinss)
+wpp7=sum(kmeanspp_sm7$withinss)
+wpp8=sum(kmeanspp_sm8$withinss)
+
+k=c(2,3,4,5,6,7,8)
+w=c(w2,w3,w4,w5,w6,w7,w8)
+wpp=c(wpp2,wpp3,wpp4,wpp5,wpp6,wpp7,wpp8)
+plot(w ~ k,type='b',col="red")
+par(new=TRUE)
+plot(wpp ~ k,type='b',col="blue")
+```
+
 ```{r}
 
-sum(kmeanspp_sm2$withinss)
-sum(kmeanspp_sm3$withinss)
-sum(kmeanspp_sm4$withinss)
-sum(kmeanspp_sm5$withinss)
-sum(kmeanspp_sm6$withinss)
-sum(kmeanspp_sm7$withinss)
-sum(kmeanspp_sm8$withinss)
+set.seed(2)
+kmeanspp_sm5<- kmeanspp(sm_new, 5)
+print(apply(kmeanspp_sm5$centers,1,function(x) 
+  colnames(sm_new)[order(x, decreasing=TRUE)[1:10]]))
+kmeanspp_sm5$size
 
 ```
 
 ```{r}
+w2=sum(kmeans_sm2$withinss)
+w3=sum(kmeans_sm3$withinss)
+w4=sum(kmeans_sm4$withinss)
+w5=sum(kmeans_sm5$withinss)
+w6=sum(kmeans_sm6$withinss)
+w7=sum(kmeans_sm7$withinss)
+w8=sum(kmeans_sm8$withinss)
+wpp2=sum(kmeanspp_sm2$withinss)
+wpp3=sum(kmeanspp_sm3$withinss)
+wpp4=sum(kmeanspp_sm4$withinss)
+wpp5=sum(kmeanspp_sm5$withinss)
+wpp6=sum(kmeanspp_sm6$withinss)
+wpp7=sum(kmeanspp_sm7$withinss)
+wpp8=sum(kmeanspp_sm8$withinss)
+
+k=c(2,3,4,5,6,7,8)
+w=c(w2,w3,w4,w5,w6,w7,w8)
+wpp=c(wpp2,wpp3,wpp4,wpp5,wpp6,wpp7,wpp8)
+plot(w ~ k,type='b',col="red")
+par(new=TRUE)
+plot(wpp ~ k,type='b',col="blue")
+```
+
+Similar to patterns identified in kmeans approach, we found the most meaningful kmeans++ model to be the one with k=5. 
+
+At first, we thought a kmeans++ model will guarantee smaller within-cluster sum of squares than those of a kmeans model with similar k value. However, that turned out not to be the case. 
+
+In our first round of results, the total within-cluster sum of squares were indeed bigger than what were in the kmeans case. We repeated the kmeans++ model by setting new seed and found smaller within-cluster sum of squares this time. Our conclusion is that kmeans model will increase computational efficiency but it can't offer a guaranteed better model in terms of within-cluster sum of squares. 
+
+Believing that k=5 is the most practical number of clusters, we further tried out a few hierarchical clustering models with different linkage methods.
+
+## hierarchical clustering models with k=5
+```{r, warning=FALSE}
 sm_distance_matrix = dist(sm_new, method='euclidean')
 
 hier_sm = hclust(sm_distance_matrix, method='average')
@@ -518,9 +616,6 @@ summary(factor(cluster2))
 
 summary(factor(cluster3))
 ```
-We tried hcluster for k=5 for min, max and average methods and find out that hcluster does not work very well in this case because most of the data points lie on cluster 1.
-
-So we just give up using this hcluster model due to its significantly inbalance cluster result that obviously will not work for the user segmentation task.
 
 ```{r}
 plot(hier_sm, cex=0.3)
@@ -530,7 +625,13 @@ plot(hier_sm2, cex=0.3)
 plot(hier_sm3, cex=0.3)
 
 ```
+We tried hierarchical clustering models for k=5 for min, max and average methods and found out they do not produce meaningful business results in this case because most of the data points lie under cluster 1 (see the Cluster Dendrograms ablove). 
 
+Finally, kemans++ with k=5 was chosen as our best model as it reduces computational time but improves the probability of finding a better model in terms of within-cluster sum of squares . We visualized the name of each category within each cluster ordered and colored by its frequency in the step below:
+
+
+
+###Here is a summary showing our understanding and marketing strategies of each cluster identified through our best model:
 ```{r,warning=FALSE}
 set.seed(1)
 require("RColorBrewer")
@@ -538,21 +639,66 @@ wordcloud(colnames(sm_sub),
           kmeanspp_sm5$centers[1,],min.freq=0,
           max.words=1000, 
           colors = rainbow(32),ordered.colors = TRUE) 
+
+```
+
+
+
+####Cluster1: These twitter followers are most likely to be middle-aged parents.
+
+* Cluster1: The company could post family-related contents such as popular parenting books to appeal to this segment.
+
+
+```{r,warning=FALSE}
 wordcloud(colnames(sm_sub),
           kmeanspp_sm5$centers[2,],min.freq=0,
           max.words=1000, 
           colors = rainbow(32),ordered.colors = TRUE) 
+ 
+```
+
+####Cluster2: These twitter followers are well-educated and newly married white-collar workers who enjoy travelling and buying high-end consumer goods.
+
+* Cluster2: The company could post promotions related to international travel and high-end nutritions supplement.
+
+
+
+```{r,warning=FALSE}
 wordcloud(colnames(sm_sub),
-          kmeanspp_sm5$centers[3,],
-          min.freq=0,max.words=1000, 
+          kmeanspp_sm5$centers[3,],min.freq=0,
+          max.words=1000, 
           colors = rainbow(32),ordered.colors = TRUE) 
+
+```
+
+####Cluster3: These twitter followers are most likely to be young colleage students who really care about appearance and enjoy playing sports and online games.
+
+* Cluster3: The company could post contents related to recipe, beauty, and shopping.
+
+
+```{r,warning=FALSE}
 wordcloud(colnames(sm_sub),
           kmeanspp_sm5$centers[4,],min.freq=0,
           max.words=1000, 
           colors = rainbow(32),ordered.colors = TRUE) 
+
+```
+
+####Cluster4: These twitter followers are young working professionals who love outdoor activities and pursue high living standards.
+
+* Cluster4: The company could post latest outdoors activites.
+
+
+```{r,warning=FALSE}
+
 wordcloud(colnames(sm_sub),
           kmeanspp_sm5$centers[5,],min.freq=0,
           max.words=1000, 
-          colors = rainbow(32),ordered.colors = TRUE) 
+          colors = rainbow(32),ordered.colors = TRUE)
+
 ```
 
+
+####Cluster5: These twitter followers are most likely to be young small business owners who focus cultural and artistic goods.
+
+* Cluster5: The company could post art-related contents.
