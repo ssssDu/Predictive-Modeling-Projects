@@ -1,0 +1,24 @@
+
+```{r echo=FALSE}
+library(arules)
+grocery <- read.transactions('https://raw.githubusercontent.com/jgscott/STA380/master/data/groceries.txt', sep=',')
+summary(grocery)
+inspect(grocery[1:10])
+itemFrequencyPlot(grocery, topN=50,  cex.names=.5)
+```
+
+```{r }
+groceryrules <- apriori(grocery, parameter=list(support=.01, confidence=.5,maxlen=4))
+inspect(groceryrules)
+inspect(subset(groceryrules, subset=lift > 2.2))
+inspect(subset(groceryrules, subset=confidence > 0.55))
+inspect(subset(groceryrules, subset=support > .005 & confidence > 0.55))
+```
+
+```{r}
+groceryrules1 <- apriori(grocery, parameter=list(support=.005, confidence=.5,maxlen=4))
+inspect(groceryrules1)
+inspect(subset(groceryrules1, subset=lift > 5.5))
+inspect(subset(groceryrules, subset=confidence > 0.5))
+inspect(subset(groceryrules, subset=support > .01 & confidence > 0.55))
+```
