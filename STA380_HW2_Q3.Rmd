@@ -1,0 +1,80 @@
+---
+title: "hw2_q3"
+author: "Lufang Liu"
+date: "8/18/2017"
+output: pdf_document
+---
+
+#Practice with association rule mining
+
+## Pick your own thresholds for lift and confidence; just be clear what these thresholds are and how you picked them. Do your discovered item sets make sense? Present your discoveries in an interesting and concise way.
+
+### Dataset Loading and Initializing 
+```{r}
+library(arules)
+
+groceries <- read.transactions ("~/GitHub_Desktop/STA380/data/groceries.txt", format = 'basket',sep=',',rm.duplicates = FALSE)
+
+inspect(groceries[1:10])
+
+summary(groceries)
+
+itemFrequencyGGPlot <- function(x, topN) {
+  library(tidyverse)
+  x %>%
+    itemFrequency %>%
+    sort %>%
+    tail(topN) %>%
+    as.data.frame %>%
+    tibble::rownames_to_column() %>%
+    ggplot(aes(reorder(rowname, `.`),`.`)) + 
+    geom_col() + 
+    coord_flip()
+}  
+itemFrequencyGGPlot(groceries, 30)
+
+```
+#### We first read in the given groceries dataset and created a transactions object using the "read.transactions" function in R. The object format satisfied the format expected by the "arules" package. We then inspected and verified the first 10 items in this object. Next, we did a summary statistics on the object created and plotted the frequency of each food item. 
+
+### Apriori Algorithm Applying and Parameters Selecting
+```{r}
+
+groceryrules <- apriori(groceries,parameter=list(support=0.001, confidence=0.4, maxlen=10))
+
+groceryrules_confidence <- sort(groceryrules, by="confidence", decreasing=TRUE)
+inspect(groceryrules_confidence[1:10])
+summary (groceryrules)
+
+groceryrules_lift <- sort(groceryrules, by="lift", decreasing=TRUE)
+inspect(groceryrules_lift[1:10])
+summary (groceryrules)
+```
+#### Support is the fraction of which our item set occurs in our dataset. Therefore, we chose a relatively small support ratio to have more rules included for inspection.
+
+#### Confidence is the probability that a rule is correct for a new transaction with items on the left. We set the minimum confidence to be 0.4 which we believe is moderate. Then we sorted rules by confidence and found the top10-ranked rules are mostly predicting "whole milk" with 100% confidence ratio, which makes sense as whole milk is the most common item for all shoppers.
+
+#### Lift is the ratio by which by the confidence of a rule exceeds the expected confidence. Based on lift ratio, we sorted the rules again. We found top10-ranked rules all make common sense. For example, first rule says: with bottled beer and liquor in lhs, you will likely see red/blush wine in rhs. 
+
+### Items Targeting
+
+#### What are customers likely to buy before buying soda?
+```{r}
+
+groceryrules <-apriori(data=groceries, parameter=list(support=0.001, confidence=0.4), 
+               appearance = list(default="lhs",rhs="soda"),
+               control = list(verbose=F))
+groceryrules <-sort(groceryrules, decreasing=TRUE,by="confidence")
+inspect(groceryrules[1:5])
+
+```
+
+#### What are customers likely to buy if they purchase soda?
+```{r}
+groceryrules_2<-apriori(data=groceries, parameter=list(supp=0.001,conf = 0.15,minlen=2), 
+               appearance = list(default="rhs",lhs="soda"),
+               control = list(verbose=F))
+groceryrules_2<-sort(groceryrules_2, decreasing=TRUE,by="confidence")
+inspect(groceryrules_2[1:5])
+```
+#### These two example show that these association rules can help store managers to promote the sales of certain goods by placing them closer to other goods that are associated with them.
+
