@@ -19,7 +19,11 @@ ABIA = read.csv("~/Documents/STA380/ABIA.csv")
 ```
 Our team decided to answer the following question: when is the best time in a year to fly from Austin to other cities?
 
+<<<<<<< Updated upstream
 As a first step, we did data cleaning and dropped all the missing values in ArrDelay and DepDelay since we only care about the data that has a status of delay. Then, we converted all months and day of week numbers to factors with names. Lastly, we summed the departural delay time and the arrival delay time together to become the total delay time. 
+=======
+Here we add the departure delay and the arrival delay together as total delay. 
+>>>>>>> Stashed changes
 
 ```{r}
 # Data cleaning: drop missing values and convert months and days into factors with month and day of week names.
@@ -39,7 +43,11 @@ As we can see from the graph of the departure and arrival delay,March, June, and
 
 For the reasons above, we strongly suggest you to arrange your travel in months such as September, October, and November to minimize the delay.
 
+<<<<<<< Updated upstream
 However, in the real case, we are limited with out choice in terms of flying dates and time choosing. Our team's advice is that it is a great idea for UT students to take into consideration of these delay issues and arrange a better time to travel.Thus, we did a further analysis on the average delays in these three months based on days in a week.
+=======
+However, in the real case, we are not always able to choose our flying time without limitation.  Our team just imagine this is an advice for the students in UT like us so we may face the situation that we need to travel during the holidays. What we can do here is to better arrange the day of the week we leave. So we did a further analysis on average delay in these three months based on different day of a week.
+>>>>>>> Stashed changes
 
 ```{r}
 new = aggregate(month_delay$TotDelay, by=list(Month=month_delay$Month, DayOfWeek=month_delay$DayOfWeek), FUN=mean)

@@ -17,10 +17,12 @@ tidy.opts=list(width.cutoff=60))
 
 ## Question 3 Grocery (Association Rule Mining)
 
-Overview: In this question, the main goal is to find interesting association rules for shopping baskets and the key is to pick our own thresholds for lift and confidence. Here, we define "interesting" rules as rules that could be used to take some pratical actions especially in business settings.
+Overview: In this question, the main goal is to find interesting association rules for shopping baskets and the key is to pick our own thresholds for lift and confidence. Here, we define "interesting" rules as rules that could be used to take some piratical actions, especially in business settings.
 
 
-Aftering reading in the text file and basic explorating, we first selected out rules that meet min required support and confidence threholds, followed by sorting according to confidence. And then we approached association rules with multiple ways, all with visulization, interpretation and discussion.Finally, we ended up the discussion with potential application and commercial suggestions.
+We first read in the given groceries dataset and created a transactions object using the "read.transactions" function in R. The object format satisfied the format expected by the "arules" package. We then inspected and verified the first 10 items in this object. Next, we did a summary statistics on the object created and plotted the frequency of each food item. 
+
+We first read in the given groceries dataset and did some basic exploration, then selected out rules that met minimum support and confidence thresholds.  After that, we sorted by confidence level. We approached association rules with multiple ways, all with visualization, interpretation and discussion. Finally, we offered a sample business application and several commercial suggestions.
 
 ```{r}
 # Load the libraries
