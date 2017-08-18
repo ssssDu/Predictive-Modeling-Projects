@@ -26,22 +26,24 @@ ABIA = read.csv("~/Documents/STA380/ABIA.csv")
 ```
 
 
-As a first step, we did data cleaning and dropped all the missing values in *ArrDelay* and *DepDelay* since we only care about the data that has a status of delay. Then, we converted all months and day of week numbers to factors with names. Lastly, we summed the departure delay time and the arrival delay time together to become the total delay time. 
+As a first step, we did a four-step data cleaning： dropped all the missing values in *ArrDelay* and *DepDelay*, converted all months and day of week numbers into factors with names, selected only filghts originated from Austin,  and lastly summed the departure delay time and the arrival delay time together to become the total delay time. 
 
 ```{r}
-# Data cleaning: drop missing values and convert months and days into factors with month and day of week names.
+# We dropped missing values and converted months and days into factors with month and day of week names. We only kept flights originated from Austin.
 
 ABIA_cleaned = ABIA[!is.na(ABIA$ArrDelay),][!is.na(ABIA$DepDelay),][ABIA$Origin=='AUS',]
 ABIA_cleaned$Month<-factor(ABIA_cleaned$Month,levels=c(1,2,3,4,5,6,7,8,9,10,11,12),labels=c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"))
 ABIA_cleaned$DayOfWeek<-factor(ABIA_cleaned$DayOfWeek,levels=c(1,2,3,4,5,6,7),labels=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"))
 
-# For these delaied flights, we summed the departure and arrival delay times together to get the total delay time. We believe the total delay time is the one which travelers care the most.
+# For these remaining flights, we summed the departure and arrival delay times together to get the total delay time. We believe the total delay time is the one which travelers care the most.
 
 ABIA_cleaned$TotDelay=ABIA_cleaned$ArrDelay+ABIA_cleaned$DepDelay
 
 ```
 
 ### Analysis by month
+
+We computed and plotted the average total delay time in each month
 
 ```{r}
 month_delay=ABIA_cleaned[,c('Month','TotDelay','DayOfWeek')]
@@ -50,11 +52,11 @@ ggplot(data = month_avg_delay,mapping = aes(x= Month, y= TotDelay )) + geom_col(
 
 ```
 
-We can see from the graph that for departure and arrival delay, March, June, and December are three months with really high average total delay time. We would recommend you to avoid travelling in these months if possible. 
+As can be seen from the graphs above, March, June, and December are three months with highest average total delay time. We would recommend you to avoid travelling in these months if possible. 
 
 ### Analysis by the day of week in each month
 
-However, we understand that it is often inconvenient to make such dramatic change to your travel plan. Our team wanted to know if it is possible to change the day of the week to travel in those months with high average total delay time. So we did a further analysis on average delay time in those three months based on different days of a week.
+However, we understand that it is often inconvenient to make such dramatic change to your travel plan. Our team wanted to know if it is possible to change the day of the week to travel in those months with highest average total delay time. So we did a further analysis on average delay time in those three months based on different days of a week.
 
 ```{r}
 new = aggregate(month_delay$TotDelay, by=list(Month=month_delay$Month, DayOfWeek=month_delay$DayOfWeek), FUN=mean)
@@ -73,16 +75,12 @@ for (i in 1:length(list)){
 
 ```
 
-
-
 As can be seen from the plots above, a good choice is to travel on Wednesday since it has the lowest average delay time in a week. 
 
 
 ### Analysis by distance 
 
-
-My team also held an assumption that the flights for different distance will be influenced differently for different months,. Due to the weather and traffic factors, at certain months it would be easy for long distance ( more than 750 miles) to re-accommodate their time by changing their speed. This kind of re-accommodating may require certain height and weather condition that related to month.
-
+My team also wanted to test if there is a difference between short and long distance flights across all 12 months.It is commonly known that it is easier for long distance (more than 750 miles) flights to re-accommodate their time by changing their speed. This kind of re-accommodating may require certain traffic and weather conditions that are related to month.
 
 ```{r}
 LongFlight=ABIA_cleaned[which(ABIA_cleaned$Distance>=750),c('Month','TotDelay','DayOfWeek')]
@@ -106,6 +104,6 @@ Given the analysis above, our team offer these suggestions to the travelers in A
 
 * If possible, schedule your trip in September, October and December to avoid the heavy traffic and long delay time.
 
-* Else if you want to have a holiday trip, Wednesday would be recommended for the sake of relatively lower delay time.
+* If you have to travel among those months, Wednesday would be recommended for the sake of attaining relatively lower delay time.
 
-* One additional suggestion: March, May and October are the ideal time for short trip, and long distance trip is recommended for the rest of the year.
+* One additional suggestion: March, May, and October are the ideal months for short trips, and also, the rest months of the year are ideal months for longer trips.
