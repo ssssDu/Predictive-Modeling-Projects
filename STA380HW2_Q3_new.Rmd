@@ -1,0 +1,140 @@
+---
+title: "STA380HW2_Q3_new"
+date: "08/18/2017"
+output: pdf_document
+mainfont: Arial
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r global_options, include = FALSE}
+knitr::opts_chunk$set(message=FALSE, 
+tidy.opts=list(width.cutoff=60)) 
+```
+
+## Question 3 Grocery (Association Rule Mining)
+
+### Overview: 
+In this question, the main goal is to find interesting association rules for shopping baskets. The key is to pick thresholds for lift and confidence. Here, we define "interesting" rules as rules that could be used for solving problemsv in business settings.
+
+### Dataset Loading and Initializing:
+We first read in the given groceries dataset and created a transactions object using the "read.transactions" function in R. The object format satisfied the format expected by the "arules" package. We then inspected and verified the first 10 items in this object. Next, we did a summary statistics on the object created and plotted the frequency of each food item.
+
+```{r}
+# Load the libraries
+library(arules)
+library(arulesViz)
+```
+
+```{r, warning=FALSE}
+# Read in the text file as a format accessible for "arules" package
+library(arules)
+grocery <- read.transactions('https://raw.githubusercontent.com/jgscott/STA380/master/data/groceries.txt', sep=',')
+summary(grocery)
+inspect(grocery[1:10])
+```
+
+```{r, warning=FALSE}
+# Plot top 10 frequent appearing items in grocery
+itemFrequencyPlot(grocery,topN=10)
+```
+
+
+### Apriori Algorithm Applying and Parameters Selecting
+
+Support is the fraction of which our item set occurs in our dataset. Therefore, we chose a relatively small support ratio to have more rules included for inspection.
+
+Confidence is the probability that a rule is correct for a new transaction with items on the left. We set the minimum confidence to be 0.4 which we believe is moderate. Then we sorted rules by confidence and found the top10-ranked rules are mostly predicting "whole milk" with 100% confidence ratio, which makes sense as whole milk is the most common item for all shoppers.
+
+Lift is the ratio by which by the confidence of a rule exceeds the expected confidence. Based on lift ratio, we sorted the rules again. We found top10-ranked rules all make common sense. For example, first rule says: with bottled beer and liquor in lhs, you will likely see red/blush wine in rhs.
+
+```{r, warning=FALSE}
+groceryrule1 <- apriori(grocery,parameter=list(support=0.001, confidence=0.4, maxlen=10))
+
+groceryrule1_confidence <- sort(groceryrule1, by="confidence", decreasing=TRUE)
+inspect(groceryrule1_confidence[1:10])
+summary (groceryrule1)
+
+groceryrule1_lift <- sort(groceryrule1, by="lift", decreasing=TRUE)
+inspect(groceryrule1_lift[1:10])
+summary (groceryrule1)
+```
+
+
+### Exploration using threholds
+
+There are mainly three objective measures: support, confidence and lift.
+
+```{r, warning=FALSE}
+# Generally explore rules
+# Choose subset according to certain lift and confidence threholds (we use their mean in this case)
+groceryrules <- apriori(grocery, parameter = list(support = 0.001, confidence = 0.5))
+# Show the top 10 rules
+inspect(groceryrules[1:10])
+inspect(subset(groceryrules,subset=lift>3.262)[1:5]) 
+inspect(subset(groceryrules, subset=confidence > 0.6250)[1:5])
+plot(head(subset(groceryrules,subset=lift>3.262), 20), method = "graph", control=list(cex=.8))
+plot(head(subset(groceryrules, subset=confidence > 0.6250), 20), method = "graph", control=list(cex=.8))
+```
+
+Observation: 
+
+In the case of lift is higher than its mean, there are some associations related to whole milk. Lift could be thought as how much more likely an item is to be purchased given that it is known that another item has been purchased relative to its general purchase rate. For example, with rice and sugar,it is almost four times more likely that whole milk is going to be purchased than in the general grocery purchase.
+
+
+In the case of confidence is higher than its mean, there are also some associations related to whole milk.Confidence represents how likely a rule is. For example,rice,sugar associated with whole milk is a rule that has a confidence "1".
+
+
+Interpretation and discussion:
+In this case, it is their means that are as threholds because we targeted rules with above_than_average threholds level. 
+
+
+Pontential application and suggestions:
+Associations that could be used are like rice, sugar with wholemilk. Grocery stores could position these three product items closely.
+
+However,as when lift is high, it could be the case that support is low, which means that the itemsets are rare in all grocery transactions.And rules that hold 100% of the time may not have the highest possible lift. As a result, method above has somewhat problmatic.
+
+### Exploration with subjective selection and objective measure (contradicting or actionable)
+```{r, warning=FALSE}
+inspect(subset(groceryrules, subset=support > 0.01 & confidence > 0.5 & lift>3))
+```
+
+Observation: 
+
+After trying different combinations of threholds, we chose the above one. In this case, there are associations of other vegetables with citrus fruit,root vegetables, and with root vegetables,tropical fruit. 
+
+
+Interpretation and discussion:
+As in this case, the corresponding association rule is actionable, we use these threholds.
+
+
+Pontential application and suggestions:
+Associations that could be used are like other vegetables with citrus fruit,root vegetables, and with root vegetables,tropical fruit. Grocery stores could position these these product items closely.
+
+### Items Targeting
+
+After general exploration, we decided to pick soda as an example to do item targeting.
+
+There are two questions we cared about:
+#### 1. What are customers likely to buy before buying soda?
+
+```{r, warning=FALSE}
+groceryrule2 <-apriori(data=grocery, parameter=list(support=0.001, confidence=0.4), 
+               appearance = list(default="lhs",rhs="soda"),
+               control = list(verbose=F))
+groceryrule2 <-sort(groceryrule2,by="confidence")
+inspect(groceryrule2[1:5])
+```
+
+#### 2. What are customers likely to buy if they've purchased soda?
+
+```{r, warning=FALSE}
+groceryrules3<-apriori(data=grocery, parameter=list(supp=0.001,conf = 0.15,minlen=2), 
+               appearance = list(default="rhs",lhs="soda"),
+               control = list(verbose=F))
+groceryrules3<-sort(groceryrules3,by="confidence")
+inspect(groceryrules3[1:5])
+```
+
+These two examples show that these association rules can help store managers to promote the sales of certain goods by placing them closer to other goods that are associated with them.
