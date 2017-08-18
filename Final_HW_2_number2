@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Question 2
+For this question, we decided to use Naive Bayes and Random Forest methods because they are considered as common ways to deal with text mining problems. After we performed these methods, we would compare them using prediction accuracies in the test data. Our goal in this question is to perform these two methods and use a better method to predict the author names given in the testing data.
 ## Naive Bayes method 
 
 ```{r cars}
