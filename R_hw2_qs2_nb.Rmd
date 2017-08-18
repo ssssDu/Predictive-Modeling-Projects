@@ -166,6 +166,8 @@ cat('Prediction accuracy for navie bayes method is ',accuracy)
 
 Finally, We got an accuracy of 18.28% when we use naive bayes model to predict the author names in test set.  
 
+We noticed that this is a reather low accuracy rate
+
 ## Random Forest Method
 
 We used the new training data set that we got from previous section to perform the randomforest model with tree number = 100.
