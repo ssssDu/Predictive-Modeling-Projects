@@ -17,18 +17,17 @@ options(warn=-1)
 library(ggplot2)
 ABIA = read.csv("~/Documents/STA380/ABIA.csv")
 ```
-First, we did data cleaning and dropped all the missing values in ArrDelay and DepDelay since we only care about the data that are with a  status of delaying. Then we converted all months and day of week numbers to factor with names. In order to figure out when is the best time in a year to fly, we just assume that we only care about the flights that origin from Austin.
+Our team decided to answer the following question: when is the best time in a year to fly from Austin to other cities?
 
-Here we add the departure delay and the arrival delay together as total dealy. 
+As a first step, we did data cleaning and dropped all the missing values in ArrDelay and DepDelay since we only care about the data that has a status of delay. Then, we converted all months and day of week numbers to factors with names. Lastly, we summed the departural delay time and the arrival delay time together to become the total delay time. 
 
 ```{r}
-# Data cleaning drop missing values and convert factors with month and day of week names.
+# Data cleaning: drop missing values and convert months and days into factors with month and day of week names.
 ABIA_cleaned = ABIA[!is.na(ABIA$ArrDelay),][!is.na(ABIA$DepDelay),][ABIA$Origin=='AUS',]
 ABIA_cleaned$Month<-factor(ABIA_cleaned$Month,levels=c(1,2,3,4,5,6,7,8,9,10,11,12),labels=c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"))
 ABIA_cleaned$DayOfWeek<-factor(ABIA_cleaned$DayOfWeek,levels=c(1,2,3,4,5,6,7),labels=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"))
 
-# For these delaied flights, we sum the departural and  arrival delay together to get the total delay. We believe that is the delay people care about most.
-
+# For these delaied flights, we sum the departural and arrival delay together to get the total delay. We believe that is the delay people care about most.
 ABIA_cleaned$TotDelay=ABIA_cleaned$ArrDelay+ABIA_cleaned$DepDelay
 month_delay=ABIA_cleaned[,c('Month','TotDelay','DayOfWeek')]
 month_avg_delay = aggregate(.~Month, data=month_delay, mean, na.rm=TRUE, na.action=NULL)
