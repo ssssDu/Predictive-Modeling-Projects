@@ -27,7 +27,7 @@ ABIA_cleaned = ABIA[!is.na(ABIA$ArrDelay),][!is.na(ABIA$DepDelay),][ABIA$Origin=
 ABIA_cleaned$Month<-factor(ABIA_cleaned$Month,levels=c(1,2,3,4,5,6,7,8,9,10,11,12),labels=c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"))
 ABIA_cleaned$DayOfWeek<-factor(ABIA_cleaned$DayOfWeek,levels=c(1,2,3,4,5,6,7),labels=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"))
 
-# For these delayed flights, we sum the departure and arrival delay together to get the total delay. We believe that is the delay people care about most.
+# For these delayed flights, we sum up the departure and arrival delay to get the total delay. We believe that this is the delay people care about the most.
 ABIA_cleaned$TotDelay=ABIA_cleaned$ArrDelay+ABIA_cleaned$DepDelay
 month_delay=ABIA_cleaned[,c('Month','TotDelay','DayOfWeek')]
 month_avg_delay = aggregate(.~Month, data=month_delay, mean, na.rm=TRUE, na.action=NULL)
@@ -35,12 +35,11 @@ ggplot(data = month_avg_delay,mapping = aes(x= Month, y= TotDelay )) + geom_col(
 
 ```
 
-We can see from the graph that for departure and arrival delay, March, June, and December are three months with really high average total delay. We guess the reason is that a lot of students in Austin just seize this chance to go home or travel during spring break, summer holiday and the Christmas.
+As we can see from the graph of the departure and arrival delay,March, June, and December are three months with really high average total delays. The reason behind this may be that many students in Austin seize this chance to go back home or travel during spring break, summer holiday and Christmas times.
 
-For the reasons above, we strongly suggest that if you have other options, just arrange your travel in some months like September, October, and November to minimize the delay.
+For the reasons above, we strongly suggest you to arrange your travel in months such as September, October, and November to minimize the delay.
 
-
-However, in the real case, we are always not able to choose our flying time without limitation.  Our team just imagine this is an advice for the students in UT like us so we may face the situation that we need to travel during the holidays. What we can do here is to better arrange the day of the week we leave. So we did a further analysis on average delay in these three months based on different day of a week.
+However, in the real case, we are limited with out choice in terms of flying dates and time choosing. Our team's advice is that it is a great idea for UT students to take into consideration of these delay issues and arrange a better time to travel.Thus, we did a further analysis on the average delays in these three months based on days in a week.
 
 ```{r}
 new = aggregate(month_delay$TotDelay, by=list(Month=month_delay$Month, DayOfWeek=month_delay$DayOfWeek), FUN=mean)
@@ -62,7 +61,7 @@ for (i in 1:length(list)){
 
 ```
 
-A good choice is to arrange the trip on Wednesday since it has the lowest average delay in the whole week. My team also hold an assumption that for different months, the flights for different distance will be influenced differently. Due to the weather and traffic factors, at certain months it would be easy for long distance ( more than 750 miles) to re-accommodate their time by changing their speed. This kind of re-accommodating may require certain height and weather condition that related to month.
+A good choice here is to arrange the trip on Wednesdays since it isthe day with the lowest average delay in a week. My team also held an assumption that the flights for different distance would be influenced differently in different months. Due to weather and traffic factors, it would be easier for those who travel long distance ( more than 750 miles) to re-accommodate their time by changing their speed at certain months. This kind of re-accommodating requires certain heights and weather conditions related to months.
 
 
 ```{r}
@@ -79,6 +78,6 @@ LongFlight_month$LongFlightSave=LongFlight_month$TotDelay-ShortFlight_month$TotD
 LongFlight_month[which(LongFlight_month$LongFlightSave>=0),c(1,4)]
 ```
 
-So for the months listed above, we recommend taking a long distance trip in order to minimize the delay. As for the rest of the year, a short distance trip would be better.
+So for the months listed above, we recommend that it is suggestive to take a long distance trip in order to mnimize the delay. As for the rest of the year, a short distance trip would be better.
 
 
