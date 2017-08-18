@@ -2,7 +2,9 @@
 title: "R_hw2_qs4"
 author: "steven"
 date: "August 18, 2017"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -26,8 +28,8 @@ readerPlain = function(fname){
 At first, we loaded the training and test directory.
 
 ```{r}
-train_dirs = Sys.glob("C:/Users/zjj27/Documents/GitHub/STA380/data/ReutersC50/C50train/*")
-test_dirs = Sys.glob("C:/Users/zjj27/Documents/GitHub/STA380/data/ReutersC50/C50test/*")
+train_dirs = Sys.glob("~/Documents/STA380/ReutersC50/C50train/*")
+test_dirs = Sys.glob("~/Documents/STA380/ReutersC50/C50test/*")
 ```
 
 ##Getiing the Sparse matrix
@@ -80,10 +82,14 @@ For train data
 
 ```{r}
 
-my_corpus_train = tm_map(my_corpus_train, content_transformer(tolower)) # make everything lowercase
-my_corpus_train = tm_map(my_corpus_train, content_transformer(removeNumbers)) # remove numbers
-my_corpus_train = tm_map(my_corpus_train, content_transformer(removePunctuation)) # remove punctuation
-my_corpus_train = tm_map(my_corpus_train, content_transformer(stripWhitespace)) ## remove excess white-space
+my_corpus_train = tm_map(my_corpus_train, content_transformer(tolower)) 
+# make everything lowercase
+my_corpus_train = tm_map(my_corpus_train, content_transformer(removeNumbers)) 
+# remove numbers
+my_corpus_train = tm_map(my_corpus_train, content_transformer(removePunctuation)) 
+# remove punctuation
+my_corpus_train = tm_map(my_corpus_train, content_transformer(stripWhitespace)) 
+# remove excess white-space
 my_corpus_train = tm_map(my_corpus_train, content_transformer(removeWords), stopwords("SMART"))
 ```
 
