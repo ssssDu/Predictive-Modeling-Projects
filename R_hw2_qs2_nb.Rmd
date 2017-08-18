@@ -166,7 +166,7 @@ cat('Prediction accuracy for navie bayes method is ',accuracy)
 
 Finally, We got an accuracy of 18.28% when we use naive bayes model to predict the author names in test set.  
 
-We noticed that this is a reather low accuracy rate
+We noticed that this is a reather low accuracy rate here using Naive Bayes, and we thought the main reason for that is the data files actually violate the assumption of independence features likelihood assumed in Naive Bayes algorithm. The probability of choosing a certain word in a text file do strongly related to other words being chosen. For the reasons above, we decided to use a random forest model to get a better accuracy rate.
 
 ## Random Forest Method
 
