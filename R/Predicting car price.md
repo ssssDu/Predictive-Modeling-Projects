@@ -228,7 +228,9 @@ bag.cars = randomForest(dataxminus$price ~. , data = dataxminus, subset = traind
 importance(bag.cars) 
 varImpPlot(bag.cars)
 
-6666666
+<br>
+<image height="500" src= "https://github.com/ssssDu/Predictive-Modeling-Projects/blob/master/R/Pictures/importance.rf.png" />
+<br>
 
 #### Check Random Forest accuracy on test data
 yhat.bag = predict(bag.cars, newdata = dataxminus[-traindata,])
