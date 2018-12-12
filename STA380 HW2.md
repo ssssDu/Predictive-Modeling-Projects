@@ -1,6 +1,5 @@
 STA 380 Homework2
 ================
-Boying You, Daxi Cheng, Jianjie Zheng, Lufang Liu, Yixuan Du
 
 This is the homework 2 for the second part of STA380 in Red McCombs business school.
 
