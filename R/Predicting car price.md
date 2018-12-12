@@ -104,7 +104,7 @@ newcarsdata$featureCount <- scale(newcarsdata$featureCount)
 Carsom$region <- NULL  
 Carsom$subTrim <- NULL
 
-## build regression over all variables left
+#### build regression over all variables left
 set.seed(94)
 lmom = lm(Carsom$price~. + I(year ^ 2)  + I(mileage ^ 2) + mileage * year + year * isOneOwner + mileage * isOneOwner + mileage * condition + condition * year + displacement * year, data = Carsom)
 plot(lmom)
