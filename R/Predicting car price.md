@@ -64,7 +64,7 @@ summary(Cars)
                                                            #3rd Qu.: 70.00   3rd Qu.:108815  
                                                            #Max.   :132.00   Max.   :299000  
                                                                              #NA's   :1   
- #### get ride of NAs
+ #### Get ride of NAs
 Carsom = na.omit(Cars)  
 summary(Carsom)
 
@@ -90,21 +90,21 @@ summary(Carsom)
                                                           #Max.   :132.00   Max.   :299000 
 
 
-#### create a new table with all dummies
+#### Create a new table with all dummies
 Cardum <- dummyVars(~.- region, data = Carsom, levelsOnly = TRUE)
 dummy <- predict(Cardum, Carsom)
 newcarsdata = data.frame(dummy)
 
-#### scale columns with comparatively big numeric value for our new data
+#### Scale columns with comparatively big numeric value for our new data
 newcarsdata$mileage <- scale(newcarsdata$mileage)
 newcarsdata$year <- scale(newcarsdata$year)
 newcarsdata$featureCount <- scale(newcarsdata$featureCount)
 
-#### get rid of region and subTrim
+#### Get rid of region and subTrim
 Carsom$region <- NULL  
 Carsom$subTrim <- NULL
 
-#### build regression over all variables left
+#### Build regression over all variables left
 set.seed(94)
 lmom = lm(Carsom$price~. + I(year ^ 2)  + I(mileage ^ 2) + mileage * year + year * isOneOwner + mileage * isOneOwner + mileage * condition + condition * year + displacement * year, data = Carsom)
 plot(lmom)
