@@ -1,4 +1,4 @@
-# The project aims to predict car price given multiple variables
+#The project aims to predict car price given multiple variables
 
 First, import packages and dataset
 library(lattice)
