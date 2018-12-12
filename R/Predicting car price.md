@@ -109,7 +109,9 @@ set.seed(94)
 lmom = lm(Carsom$price~. + I(year ^ 2)  + I(mileage ^ 2) + mileage * year + year * isOneOwner + mileage * isOneOwner + mileage * condition + condition * year + displacement * year, data = Carsom)
 plot(lmom)
 
-666666666666
+<br>
+<image height="300" src= "https://github.com/ssssDu/Predictive-Modeling-Projects/blob/master/R/Pictures/Rplot02.png" />
+<br>
 
 x = model.matrix(~. - price + I(mileage ^ 2) + I(year ^ 2) + year * mileage + year * isOneOwner  + mileage * isOneOwner + mileage * condition + condition * year + displacement * year , data=Carsom)[,-1]
 y = Carsom$price
@@ -138,6 +140,10 @@ lasso_co = predict(lasso.fit, type = "coefficients", s = minlamb)
 plot(log(cv.lasso$lambda),sqrt(cv.lasso$cvm),main="Lasso CV (k=10)",xlab="log(lambda)",ylab = "RMSE",col=4,type="b",cex.lab=1.2)
 abline(v=log(selamb),lty=2,col=2,lwd=2)
 
+<br>
+<image height="300" src= "https://github.com/ssssDu/Predictive-Modeling-Projects/blob/master/R/Pictures/Screen%20Shot%202018-12-12%20at%201.27.59%20PM.png" />
+<br>
+
 #### Ridge on training data
 ridge.fit = glmnet(x,y,standardize = FALSE,alpha = 0)
 cv.ridge = cv.glmnet(x[traindata,], y[traindata],alpha = 0) 
@@ -154,6 +160,10 @@ ridge_co = predict(ridge.fit, type = "coefficients", s = ridgelamb)
 #### Show the cross-validation graph
 plot(log(cv.ridge$lambda),sqrt(cv.ridge$cvm),main="Ridge CV (k=10)",xlab="log(lambda)",ylab = "RMSE",col=4,type="b",cex.lab=1.2)
 abline(v=log(ridgelamb1se),lty=2,col=2,lwd=2)
+
+<br>
+<image height="300" src= "https://github.com/ssssDu/Predictive-Modeling-Projects/blob/master/R/Pictures/Screen%20Shot%202018-12-12%20at%201.28.03%20PM.png" />
+<br>
 
 #### New data frame after variable selection
 xdf = data.frame(x)
@@ -193,7 +203,9 @@ xdfprice = data.frame(xdf, Carsom$price)
 pcr.fit = pcr(xdfprice$Carsom.price ~., data = xdfprice, subset = traindata ,scale = FALSE,validation = "CV")
 validationplot(pcr.fit,val.type = "MSEP")
 
-666666666
+<br>
+<image height="300" src= "https://github.com/ssssDu/Predictive-Modeling-Projects/blob/master/R/Pictures/Screen%20Shot%202018-12-12%20at%201.27.42%20PM.png" />
+<br>
 
 #### Check PCR accuracy on test data
 pcr.pred = predict(pcr.fit, xdfprice[testdata,], ncomp = 40)
@@ -201,15 +213,15 @@ sqrt(mean((pcr.pred - y.test) ^ 2)) ###8849.139
 
 #### Fit PCR model
 pcrnew.fit = pcr(xdfprice$Carsom.price ~., data = xdfprice ,  scale = FALSE, ncomp = 40)
-summary(pcrnew.fit)
-
-66666666
+#summary(pcrnew.fit)
 
 #### PLS & Cross-validation
 pls.fit = plsr(xdfprice$Carsom.price ~., data = xdfprice, subset = traindata ,scale = FALSE,validation = "CV")
 validationplot(pls.fit,val.type = "MSEP")
 
-6666666666
+<br>
+<image height="300" src= "https://github.com/ssssDu/Predictive-Modeling-Projects/blob/master/R/Pictures/Screen%20Shot%202018-12-12%20at%201.27.36%20PM.png" />
+<br>
 
 #### Check PLS accuracy on test data
 pls.pred = predict(pls.fit, xdfprice[testdata,], ncomp = 12)
@@ -217,9 +229,7 @@ sqrt(mean((pls.pred - y.test) ^ 2)) #8770.457
 
 #### Fit PLS model
 plsnew.fit = plsr(xdfprice$Carsom.price ~., data = xdfprice ,  scale = FALSE, ncomp = 12)
-summary(plsnew.fit)
-
-6666666
+#summary(plsnew.fit)
 
 #### Random Forest Model
 xminus = model.matrix(~., Carsom)[,-1]
@@ -229,7 +239,7 @@ importance(bag.cars)
 varImpPlot(bag.cars)
 
 <br>
-<image height="500" src= "https://github.com/ssssDu/Predictive-Modeling-Projects/blob/master/R/Pictures/importance.rf.png" />
+<image height="300" src= "https://github.com/ssssDu/Predictive-Modeling-Projects/blob/master/R/Pictures/importance.rf.png" />
 <br>
 
 #### Check Random Forest accuracy on test data
@@ -239,11 +249,14 @@ sqrt(mean((yhat.bag - cartree.test)^2)) ###6775.446 ntree = 100
 plot(yhat.bag,cartree.test)
 abline(0,1,col='red',lwd=2)
 
-6666666
+<br>
+<image height="300" src= "https://github.com/ssssDu/Predictive-Modeling-Projects/blob/master/R/Pictures/Screen%20Shot%202018-12-12%20at%201.15.07%20PM.png" />
+<br>
 
 #### Boosting Model
 boost.cars = gbm(price ~ . , data = dataxminus[traindata,], distribution = "gaussian", n.tree = 1000, interaction.depth = 4, shrinkage=.2,verbose = FALSE)
 summary(boost.cars)
+
 ##var      rel.inf
 ##year 5.354197e+01
 ##mileage 3.693464e+01
@@ -252,11 +265,15 @@ summary(boost.cars)
 #conditionUsed 8.766579e-01
 plot(boost.cars, i = "year")
 
-66666666
+<br>
+<image height="300" src= "https://github.com/ssssDu/Predictive-Modeling-Projects/blob/master/R/Pictures/Rplot04.png" />
+<br>
 
 plot(boost.cars, i = "mileage")
 
-666666666
+<br>
+<image height="300" src= "https://github.com/ssssDu/Predictive-Modeling-Projects/blob/master/R/Pictures/Rplot05.png" />
+<br>
 
 #### Check Boosting accuracy on test data
 yhat.boost = predict(boost.cars, newdata = dataxminus[-traindata,], n.trees = 1000)
@@ -264,8 +281,10 @@ cartree.test = dataxminus[-traindata, "price"]
 sqrt(mean((yhat.boost - cartree.test)^2)) ###6952
 
 
-# Random Forest model has the best performance in this project
+## Random Forest model has the best performance in this project
 
-
+<br>
+<image height="300" src= "https://github.com/ssssDu/Predictive-Modeling-Projects/blob/master/R/Pictures/Screen%20Shot%202018-12-12%20at%201.42.34%20PM.png" />
+<br>
 
 
