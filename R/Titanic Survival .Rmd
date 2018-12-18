@@ -1,0 +1,232 @@
+---
+Titanic Survival
+output:
+  pdf_document: default
+  html_document: default
+---
+##Import Packages
+```{r setup, include=FALSE}
+library('dplyr') # data manipulation
+library('ggplot2') 
+```
+##Load in datasets
+```{r dataset}
+# load train.csv
+train <- train
+# load test.csv
+test  <- test
+# combine them as a whole
+test$Survived <- NA
+full <- rbind(train,test)
+```
+##Show & Check the full data
+```{r echo=FALSE}
+head(full)
+```
+##Data Cleaning 
+```{r echo=FALSE}
+# Dump out Name Column
+full$Name <- NA
+# Process Age Column
+age <- full$Age
+n = length(age)
+# replace missing value with a random sample from raw data
+set.seed(123)
+for(i in 1:n){
+  if(is.na(age[i])){
+    age[i] = sample(na.omit(full$Age),1)
+  }
+}
+# Process Cabin Column
+cabin <- full$Cabin
+n = length(cabin)
+for(i in 1:n){
+  if(is.na(cabin[i])){
+    cabin[i] = 0
+  } else{
+    s = strsplit(cabin[i]," ")
+    cabin[i] = length(s[[1]])
+  }
+} 
+# Check fare missing values 
+full$PassengerId[is.na(full$Fare)]
+#full[1044,]
+# Fill in fare missing values
+full$Fare[1044] <- median(full[full$Pclass == '3' & full$Embarked == 'S', ]$Fare, na.rm = TRUE)
+# Process Embarked Column
+embarked <- full$Embarked
+n = length(embarked)
+for(i in 1:n){
+  if(is.na(embarked[i])){
+    embarked[i] = "S"
+  }
+}
+```
+Exploratory Analysis & Data Processing
+```{r echo=FALSE}
+# Survival vs Age
+d <- data.frame(Age = age[0:891], Survived = train$Survived)
+ggplot(d, aes(Age,fill = factor(Survived))) +
+    geom_histogram()
+```
+```{r echo=FALSE}
+# create bar chart to show relationship between survival rate and age intervals
+cuts <- cut(d$Age,hist(d$Age,10,plot = F)$breaks)
+rate <- tapply(d$Survived,cuts,mean)
+d2 <- data.frame(age = names(rate),rate)
+barplot(d2$rate, xlab = "age",ylab = "survival rate")
+```
+```{r echo=FALSE}
+# create histgram to show effect of Sex on survival
+ggplot(train, aes(Sex,fill = factor(Survived))) +
+    geom_histogram(stat = "count")
+```
+```{r echo=FALSE}
+# Pclass v.s. Survival
+ggplot(train, aes(Pclass,fill = factor(Survived))) +
+    geom_histogram(stat = "count")
+```
+```{r echo=FALSE}
+# Family Size v.s. Survival
+ggplot(train, aes(Parch,fill = factor(Survived))) +
+    geom_histogram(stat = "count")
+```
+```{r echo=FALSE}
+# Having siblings/spouse v.s. Survival
+ggplot(train, aes(SibSp,fill = factor(Survived))) +
+    geom_histogram(stat = "count")
+```
+```{r echo=FALSE}
+# Combine SibSp and Parch 
+family <- full$SibSp + full$Parch
+d <- data.frame(family = family[1:891],Survived = train$Survived)
+ggplot(d, aes(family,fill = factor(Survived))) +
+    geom_histogram(stat = "count")
+```
+```{r echo=FALSE}
+# Fare vs Survival
+ggplot(train, aes(Fare,fill = factor(Survived))) +
+    geom_histogram()
+```
+```{r echo=FALSE}
+#Fare vs Survival
+cuts <- cut(train$Fare,hist(train$Fare,10,plot = F)$breaks)
+rate <- tapply(train$Survived,cuts,mean)
+d <- data.frame(fare = names(rate),rate)
+barplot(d$rate, xlab = "fare",ylab = "survival rate")
+```
+```{r echo=FALSE}
+# Embarked v.s. Survival
+d <- data.frame(Embarked = embarked[1:891], Survived = train$Survived)
+ggplot(d, aes(Embarked,fill = factor(Survived))) +
+    geom_histogram(stat = "count")
+```
+## Feature Engineering
+```{r echo=FALSE}
+f.survived = train$Survived
+# Train-test Split
+f.age = age[1:891]    
+t.age = age[892:1309] 
+f.fare = full$Fare[1:891]
+t.fare = full$Fare[892:1309]
+f.cabin = cabin[1:891]
+t.cabin = cabin[892:1309]
+family <- full$SibSp + full$Parch
+f.family = family[1:891]
+t.family = family[892:1309]
+f.pclass = train$Pclass
+t.pclass = test$Pclass
+f.sex = train$Sex
+t.sex = test$Sex
+f.embarked = embarked[1:891]
+t.embarked = embarked[892:1309]
+```
+## Modeling
+```{r echo=FALSE}
+# Dataframe for training
+data = data.frame(survived = f.survived, age = f.age, fare = f.fare , sex = f.sex, 
+       embarked = f.embarked ,family = f.family,cabin =  f.cabin, pclass= f.pclass)
+# logistic regression
+fit_logit <- glm(factor(survived) ~ age + fare + sex + embarked + family 
+                 + cabin + pclass,data = data,family = binomial)
+# Prediction with Logit
+pred = rep(NA,891)
+for(i in 1:891){
+ pred[i] = round(fit_logit$fitted.values[[i]],0)
+}
+# Check Accuracy
+mean(pred == train$Survived)
+```
+```{r echo=FALSE}
+# decision tree
+library(rpart)
+fit_dt <- rpart(factor(survived) ~ age + fare + sex + embarked + family 
+                 + cabin + pclass,data = data)
+# Prediction with Decision Tree
+dt.fitted = predict(fit_dt)
+pred1 = rep(NA,891)
+for(i in 1:891){
+  if(dt.fitted[i,1] >= dt.fitted[i,2] ){
+    pred1[i] = 0
+  } else{
+    pred1[i] = 1
+  }
+}
+# Check Accuracy
+mean(pred1 == train$Survived)
+```
+```{r echo=FALSE}
+# Plot Decision Tree
+library(rpart.plot)
+rpart.plot(fit_dt, extra = 106)
+```
+
+```{r echo=FALSE}
+# Random Forest
+library('randomForest')
+set.seed(123)
+fit_rf <- randomForest(factor(survived) ~ age + fare + sex + embarked + family 
+                 + cabin + pclass,data = data)
+# Prediction with Random Forest
+rf.fitted = predict(fit_rf)
+pred2 = rep(NA,891)
+for(i in 1:891){
+  pred2[i] = as.integer(rf.fitted[[i]]) - 1
+}
+# Check Accuracy
+mean(pred2 == train$Survived)
+```
+```{r echo=FALSE}
+# svm
+library(e1071)
+fit_svm <- svm(factor(survived) ~ age + fare + sex + embarked + family 
+                 + cabin + pclass,data = data)
+# Prediction with svm
+svm.fitted = predict(fit_svm)
+pred3 = rep(NA,891)
+for(i in 1:891){
+  pred3[i] = as.integer(svm.fitted[[i]]) - 1
+}
+# Check Accuracy
+mean(pred3 == train$Survived)
+```
+## Prediction with decision tree model
+```{r echo=FALSE}
+# Dataframe for training
+test_data <- data.frame(age = t.age, fare = t.fare, sex = t.sex, embarked = t.embarked,
+                            family = t.family, cabin =  t.cabin, pclass = t.pclass)
+# make prediction
+dt_predict = predict(fit_dt,newdata = test_data )
+dt_predict1 = rep(NA,418)
+for(i in 1:418){
+  if(dt.fitted[i,1] >= dt.fitted[i,2] ){
+    dt_predict1[i] = 0
+  } else{
+    dt_predict1[i] = 1
+  }
+}
+table(dt_predict1)
+```
+
+
+
