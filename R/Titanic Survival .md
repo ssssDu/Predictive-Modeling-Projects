@@ -4,12 +4,12 @@ output:
   github_document:
     html_preview: false
 ---
-##Import Packages
+## Import Packages
 ```{r setup, include=FALSE}
 library('dplyr') # data manipulation
 library('ggplot2') 
 ```
-##Load in datasets
+## Load in datasets
 ```{r dataset}
 # load train.csv
 train <- read.csv('~/Downloads/train.csv', stringsAsFactors = F)
@@ -19,11 +19,11 @@ test  <- read.csv('~/Downloads/test.csv', stringsAsFactors = F)
 test$Survived <- NA
 full <- rbind(train,test)
 ```
-##Show & Check the full data
+## Show & Check the full data
 ```{r echo=FALSE}
 head(full)
 ```
-##Data Cleaning 
+## Data Cleaning 
 ```{r echo=FALSE}
 # Dump out Name Column
 full$Name <- NA
@@ -62,7 +62,7 @@ for(i in 1:n){
   }
 }
 ```
-Exploratory Analysis & Data Processing
+## Exploratory Analysis & Data Processing
 ```{r echo=FALSE}
 # Survival vs Age
 d <- data.frame(Age = age[0:891], Survived = train$Survived)
