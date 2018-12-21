@@ -16,13 +16,10 @@ Cars <- read_csv("~/Downloads/Cars.csv")
 #### Clean the dataset
 unique(Cars$trim)
 Cars$x1 <- NULL
-
 #"320"    "420"    "500"    "430"    "55 AMG" "600"    "550"    "63 AMG" "350"    "400"    "unsp"   "65 AMG" "450" 
 unique(Cars$condition)
-
 #"Used" "CPO"  "New" 
 unique(Cars$isOneOwner)
-
 #"f" "t"
 unique(Cars$color)
 #"Gold"      "White"     "Silver"    "Black"     "Gray"      "Blue"      "Beige"     "unsp"      "Green"     "Red"       #"Brown"     "Purple"    "Bronze"    "Turquoise" "Yellow"   
