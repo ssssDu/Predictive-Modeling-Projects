@@ -16,21 +16,13 @@ Cars <- read_csv("~/Downloads/Cars.csv")
 #### Clean the dataset
 unique(Cars$trim)
 Cars$x1 <- NULL
-#"320"    "420"    "500"    "430"    "55 AMG" "600"    "550"    "63 AMG" "350"    "400"    "unsp"   "65 AMG" "450" 
-unique(Cars$condition)
-#"Used" "CPO"  "New" 
+
 unique(Cars$isOneOwner)
-#"f" "t"
-unique(Cars$color)
-#"Gold"      "White"     "Silver"    "Black"     "Gray"      "Blue"      "Beige"     "unsp"      "Green"     "Red"       #"Brown"     "Purple"    "Bronze"    "Turquoise" "Yellow"   
+unique(Cars$color)  
 unique(Cars$displacement)
-#"3.2 L" "4.2 L" "5.0 L" "4.3 L" "5.4 L" "5.8 L" "5.5 L" "6.3 L" "4.6 L" "3.0 L" "3.5 L" "6.0 L" "unsp"  "4.7 L" "3.7 L" "8.0 #L"
-unique(Cars$fuel)
-#"Gasoline" "Diesel"   "Hybrid"   "unsp"   
+unique(Cars$fuel)  
 unique(Cars$state)
-#"PA"   "NY"   "NJ"   "GA"   "CO"   "FL"   "TN"   "VA"   "OH"   "TX"   "IL"   "MI"   "AZ"   "ID"  "NC"   "CA"   "MA"   "MS"   #"KS"   "IN"   "KY"   "MD"   "AL"   "SC"   "LA"   "OK"   "WI"   "CT"  "NH"   "UT"   "MN"   "RI"   "OR"   "HI"   "DE"   "MO"   #"WV"   "WA"   "NV"   "NE"   "MT"   "AR"  "ON"   "NM"   "ME"   "IA"   "ND"   "DC"   "WY"   "unsp" "AK"   "SD"  
 unique(Cars$soundSystem)
-#"Premium"         "Bose"            "unsp"            "Alpine"          "Harman Kardon"  "Bang Olufsen"    "Boston Acoustic"
 unique(Cars$wheelType)
 table(subTrim)
 #Hybrid   unsp 
