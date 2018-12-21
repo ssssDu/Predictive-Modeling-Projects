@@ -11,12 +11,12 @@ library(pls)
 library(randomForest)
 library(gbm)
 library(readr)
+
 Cars <- read_csv("~/Downloads/Cars.csv")
 
 #### Clean the dataset
 unique(Cars$trim)
 Cars$x1 <- NULL
-
 unique(Cars$isOneOwner)
 unique(Cars$color)  
 unique(Cars$displacement)
