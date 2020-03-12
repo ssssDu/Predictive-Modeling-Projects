@@ -1,2 +1,2 @@
-# Here are some projects writen in Python
+# Here are some predictive analytics projects in Python.
 # Hope you enjoy it!
